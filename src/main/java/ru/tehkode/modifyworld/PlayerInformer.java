@@ -8,165 +8,138 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import ru.tehkode.permissions.PermissionUser;
-import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PlayerInformer {
 
-	public final static String PERMISSION_DENIED = "Sorry, you don't have enough permissions";
-	public final static String WHITELIST_MESSAGE = "You are not allowed to join this server. Goodbye!";
-	public final static String PROHIBITED_ITEM = "Prohibited item \"%s\" has been removed from your inventory.";
-	public final static String DEFAULT_MESSAGE_FORMAT = "&f[&2Modifyworld&f]&4 %s";
-	// Default message format
-	protected String messageFormat = DEFAULT_MESSAGE_FORMAT;
-	protected Map<String, String> messages = new HashMap<String, String>();
-	// Flags
-	protected boolean enabled = false;
-	protected boolean individualMessages = false;
-	protected String defaultMessage = PERMISSION_DENIED;
+    public final static String PERMISSION_DENIED = "Sorry, you don't have enough permissions";
+    public final static String WHITELIST_MESSAGE = "You are not allowed to join this server. Goodbye!";
+    public final static String PROHIBITED_ITEM = "Prohibited item \"%s\" has been removed from your inventory.";
+    public final static String DEFAULT_MESSAGE_FORMAT = "&f[&2Modifyworld&f]&4 %s";
+    // Default message format
+    protected String messageFormat = DEFAULT_MESSAGE_FORMAT;
+    protected Map<String, String> messages = new HashMap<String, String>();
+    // Flags
+    protected boolean enabled = false;
+    protected boolean individualMessages = false;
+    protected String defaultMessage = PERMISSION_DENIED;
 
-	public PlayerInformer(ConfigurationSection config) {
-		this.enabled = config.getBoolean("inform-players", enabled);
+    public PlayerInformer(ConfigurationSection config) {
+        this.enabled = config.getBoolean("inform-players", enabled);
 
-		this.loadConfig(config.getConfigurationSection("messages"));
-	}
+        this.loadConfig(config.getConfigurationSection("messages"));
+    }
 
-	private void loadConfig(ConfigurationSection config) {
+    private void loadConfig(ConfigurationSection config) {
 
-		this.defaultMessage = config.getString("default-message", this.defaultMessage);
+        this.defaultMessage = config.getString("default-message", this.defaultMessage);
 
-		this.messageFormat = config.getString("message-format", this.messageFormat);
+        this.messageFormat = config.getString("message-format", this.messageFormat);
 
-		this.individualMessages = config.getBoolean("individual-messages", this.individualMessages);
+        this.individualMessages = config.getBoolean("individual-messages", this.individualMessages);
 
-		this.importMessages(config);
+        this.importMessages(config);
 
-		for (String permission : config.getKeys(true)) {
-			if (!config.isString(permission)) {
-				continue;
-			}
+        for (String permission : config.getKeys(true)) {
+            if (!config.isString(permission)) {
+                continue;
+            }
 
-			setMessage(permission, config.getString(permission.replace("/", ".")));
-		}
-	}
+            setMessage(permission, config.getString(permission.replace("/", ".")));
+        }
+    }
 
-	public void setMessage(String permission, String message) {
-		messages.put(permission, message);
-	}
+    public void setMessage(String permission, String message) {
+        messages.put(permission, message);
+    }
 
-	public String getMessage(String permission) {
-		if (messages.containsKey(permission)) {
-			return messages.get(permission);
-		}
+    public String getMessage(String permission) {
+        if (messages.containsKey(permission)) {
+            return messages.get(permission);
+        }
 
-		String perm = permission;
-		int index;
+        String perm = permission;
+        int index;
 
-		while ((index = perm.lastIndexOf(".")) != -1) {
-			perm = perm.substring(0, index);
+        while ((index = perm.lastIndexOf(".")) != -1) {
+            perm = perm.substring(0, index);
 
-			if (messages.containsKey(perm)) {
-				String message = messages.get(perm);
-				messages.put(permission, message);
-				return message;
-			}
-		}
+            if (messages.containsKey(perm)) {
+                String message = messages.get(perm);
+                messages.put(permission, message);
+                return message;
+            }
+        }
 
-		return this.defaultMessage;
-	}
+        return this.defaultMessage;
+    }
 
-	public String getMessage(Player player, String permission) {
-		if (PermissionsEx.isAvailable()) {
-			PermissionUser user = PermissionsEx.getUser(player);
+    public String getMessage(Player player, String permission) {
+        return getMessage(permission);
+    }
 
-			String message;
-			String perm = permission;
-			int index;
+    public void informPlayer(Player player, String permission, Object... args) {
+        if (!enabled) {
+            return;
+        }
 
-			while ((index = perm.lastIndexOf(".")) != -1) {
-				perm = perm.substring(0, index);
+        String message = getMessage(player, permission).replace("$permission", permission);
 
-				message = user.getOption("permission-denied-" + perm, player.getWorld().getName(), null);
-				if (message == null) {
-					continue;
-				}
+        for (int i = 0; i < args.length; i++) {
+            message = message.replace("$" + (i + 1), describeObject(args[i]));
+        }
 
-				return message;
-			}
+        if (message != null && !message.isEmpty()) {
+            player.sendMessage(String.format(messageFormat, message).replaceAll("&([a-z0-9])", "\u00A7$1"));
+        }
+    }
 
-			message = user.getOption("permission-denied", player.getWorld().getName(), null);
+    protected String describeObject(Object obj) {
+        if (obj instanceof ComplexEntityPart) { // Complex entities
+            return describeObject(((ComplexEntityPart) obj).getParent());
+        } else if (obj instanceof Item) { // Dropped items
+            return describeMaterial(((Item) obj).getItemStack().getType());
+        } else if (obj instanceof ItemStack) { // Items
+            return describeMaterial(((ItemStack) obj).getType());
+        } else if (obj instanceof Entity) { // Entities
+            return ((Entity) obj).getType().toString().toLowerCase().replace("_", " ");
+        } else if (obj instanceof Block) { // Blocks
+            return describeMaterial(((Block) obj).getType());
+        } else if (obj instanceof Material) { // Just material
+            return describeMaterial((Material) obj);
+        }
 
-			if (message != null) {
-				return message;
-			}
-		}
+        return obj.toString();
+    }
 
-		return getMessage(permission);
-	}
+    private String describeMaterial(Material material) {
+        // TODO: implement data id
 
-	public void informPlayer(Player player, String permission, Object... args) {
-		if (!enabled) {
-			return;
-		}
+        if (material == Material.INK_SACK) {
+            return "dye";
+        }
 
-		String message = getMessage(player, permission).replace("$permission", permission);
+        return material.toString().toLowerCase().replace("_", " ");
+    }
 
-		for (int i = 0; i < args.length; i++) {
-			message = message.replace("$" + (i + 1), describeObject(args[i]));
-		}
+    // For backward compatibility
+    private void importMessages(ConfigurationSection config) {
+        // This should NOT be refactored, because it would be stupid :D
+        if (config.isString("whitelistMessage")) {
+            setMessage("modifyworld.login", config.getString("whitelistMessage"));
+            config.set("whitelistMessage", null);
+        }
 
-		if (message != null && !message.isEmpty()) {
-			player.sendMessage(String.format(messageFormat, message).replaceAll("&([a-z0-9])", "\u00A7$1"));
-		}
-	}
+        if (config.isString("prohibitedItem")) {
+            setMessage("modifyworld.items.have", config.getString("prohibitedItem"));
+            config.set("prohibitedItem", null);
+        }
 
-	protected String describeObject(Object obj) {
-		if (obj instanceof ComplexEntityPart) { // Complex entities
-			return describeObject(((ComplexEntityPart) obj).getParent());
-		} else if (obj instanceof Item) { // Dropped items
-			return describeMaterial(((Item) obj).getItemStack().getType());
-		} else if (obj instanceof ItemStack) { // Items
-			return describeMaterial(((ItemStack) obj).getType());
-		} else if (obj instanceof Entity) { // Entities
-			return ((Entity) obj).getType().toString().toLowerCase().replace("_", " ");
-		} else if (obj instanceof Block) { // Blocks
-			return describeMaterial(((Block) obj).getType());
-		} else if (obj instanceof Material) { // Just material
-			return describeMaterial((Material) obj);
-		}
-
-		return obj.toString();
-	}
-
-	private String describeMaterial(Material material) {
-		// TODO: implement data id
-
-		if (material == Material.INK_SACK) {
-			return "dye";
-		}
-
-		return material.toString().toLowerCase().replace("_", " ");
-	}
-
-	// For backward compatibility
-	private void importMessages(ConfigurationSection config) {
-		// This should NOT be refactored, because it would be stupid :D
-		if (config.isString("whitelistMessage")) {
-			setMessage("modifyworld.login", config.getString("whitelistMessage"));
-			config.set("whitelistMessage", null);
-		}
-
-		if (config.isString("prohibitedItem")) {
-			setMessage("modifyworld.items.have", config.getString("prohibitedItem"));
-			config.set("prohibitedItem", null);
-		}
-
-		if (config.isString("permissionDenied")) {
-			setMessage("modifyworld", config.getString("permissionDenied"));
-			config.set("permissionDenied", null);
-		}
-	}
+        if (config.isString("permissionDenied")) {
+            setMessage("modifyworld", config.getString("permissionDenied"));
+            config.set("permissionDenied", null);
+        }
+    }
 }
