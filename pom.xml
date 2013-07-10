@@ -4,6 +4,17 @@
     <groupId>ru.tehkode</groupId>
     <artifactId>Modifyworld</artifactId>
     <version>1.19.6</version>
+    <name>Modifyworld</name>
+    <url>https://github.com/t3hk0d3/Modifyworld</url>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/t3hk0d3/Modifyworld/issues</url>
+    </issueManagement>
+    <scm>
+        <connection>scm:git:git://github.com/PEXPlugins/Modifyworld.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/PEXPlugins/Modifyworld.git</developerConnection>
+        <url>https://github.com/PEXPlugins/PermissionsEx.git</url>
+    </scm>
     <build>
         <finalName>${project.artifactId}</finalName>
         <resources>
@@ -60,21 +71,11 @@
             <version>1.6.1-R0.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>net.milkbowl.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.26-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
     <repositories>
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>vault-repo</id>
-            <url>http://ci.herocraftonline.com/plugin/repository/everything</url>
         </repository>
     </repositories>
     <properties>
