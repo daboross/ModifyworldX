@@ -33,29 +33,64 @@ public class ModifyworldPermissionHandler {
         this.useMaterialNames = useMaterialNames;
     }
 
-    public void register() {
+    public void registerAllPermissions() {
         PluginManager pm = Bukkit.getServer().getPluginManager();
-        Permission modifyworldStar = new Permission("modifyworld.*");
-        registerBlocks(pm).addParent(modifyworldStar, true);
+        registerBlocks(pm);
+        registerChat(pm);
+        Map<String, Boolean> firstLevelNodes = getFirstLevelNodes();
+        Permission modifyworldStar = new Permission("modifyworld.*", firstLevelNodes);
+        pm.addPermission(modifyworldStar);
     }
 
-    private Permission registerBlocks(PluginManager pm) {
-        Map<String, Boolean> blocksPlace = new HashMap<String, Boolean>();
-        Map<String, Boolean> blocksDestroy = new HashMap<String, Boolean>();
-        Map<String, Boolean> blocksInteract = new HashMap<String, Boolean>();
-        for (Material m : Material.values()) {
-            blocksPlace.put("modifyworld.blocks.place." + getMaterialPermission(m), true);
-            blocksDestroy.put("modifyworld.blocks.destroy." + getMaterialPermission(m), true);
-            blocksInteract.put("modifyworld.blocks.interact." + getMaterialPermission(m), true);
+    private Map<String, Boolean> getFirstLevelNodes() {
+        Map<String, Boolean> firstLevelNodes = new HashMap<String, Boolean>(15);
+        firstLevelNodes.put("modifyworld.login", true);
+        firstLevelNodes.put("modifyworld.chat", true);
+        firstLevelNodes.put("modifyworld.sneak", true);
+        firstLevelNodes.put("modifyworld.sprint", true);
+        firstLevelNodes.put("modifyworld.chat.*", true);
+        firstLevelNodes.put("modifyworld.usebeds", true);
+        firstLevelNodes.put("modifyworld.bucket.*", true);
+        firstLevelNodes.put("modifyworld.digestion", true);
+        firstLevelNodes.put("modifyworld.items.*", true);
+        firstLevelNodes.put("modifyworld.damage.*", true);
+        firstLevelNodes.put("modifyworld.mobtarget.*", true);
+        firstLevelNodes.put("modifyworld.blocks.*", true);
+        firstLevelNodes.put("modifyworld.interact.*", true);
+        firstLevelNodes.put("modifyworld.tame.*", true);
+        firstLevelNodes.put("modifyworld.vehicle.*", true);
+        return firstLevelNodes;
+    }
+
+    private void registerChat(PluginManager pm) {
+        Map<String, Boolean> chatNodes = new HashMap<String, Boolean>(1);
+        chatNodes.put("modifyworld.chat.private", true);
+        Permission chatNodeStar = new Permission("modifyworld.chat.*", chatNodes);
+        pm.addPermission(chatNodeStar);
+    }
+
+    private void registerBlocks(PluginManager pm) {
+        Material[] materialValues = Material.values();
+        Map<String, Boolean> blocksDestroy = new HashMap<String, Boolean>(materialValues.length);
+        Map<String, Boolean> blocksPlace = new HashMap<String, Boolean>(materialValues.length);
+        Map<String, Boolean> blocksInteract = new HashMap<String, Boolean>(materialValues.length);
+        for (Material m : materialValues) {
+            String materialPermission = getMaterialPermission(m);
+            blocksPlace.put("modifyworld.blocks.place." + materialPermission, true);
+            blocksDestroy.put("modifyworld.blocks.destroy." + materialPermission, true);
+            blocksInteract.put("modifyworld.blocks.interact." + materialPermission, true);
         }
+        Permission blocksDestroyermission = new Permission("modifyworld.blocks.desktroy.*", blocksDestroy);
+        pm.addPermission(blocksDestroyermission);
         Permission blocksPlacePermission = new Permission("modifyworld.blocks.place.*", blocksPlace);
-        Permission blocksRemovePermission = new Permission("modifyworld.blocks.remove.*", blocksPlace);
+        pm.addPermission(blocksPlacePermission);
         Permission blocksInteractPermission = new Permission("modifyworld.blocks.interact.*", blocksPlace);
+        pm.addPermission(blocksInteractPermission);
         Permission blocksStarPermission = new Permission("modifyworld.blocks.*");
+        pm.addPermission(blocksStarPermission);
         blocksPlacePermission.addParent(blocksStarPermission, true);
-        blocksRemovePermission.addParent(blocksStarPermission, true);
+        blocksDestroyermission.addParent(blocksStarPermission, true);
         blocksInteractPermission.addParent(blocksStarPermission, true);
-        return blocksStarPermission;
     }
 
     private String getInventoryTypePermission(InventoryType type) {
