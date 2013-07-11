@@ -25,11 +25,11 @@ import ru.tehkode.modifyworld.EntityCategory;
  *
  * @author daboross
  */
-public class ModifyworldPermissionHandler {
+public class ModifyworldPermissionRegister {
 
     private final boolean useMaterialNames;
 
-    public ModifyworldPermissionHandler(boolean useMaterialNames) {
+    public ModifyworldPermissionRegister(boolean useMaterialNames) {
         this.useMaterialNames = useMaterialNames;
     }
 
@@ -80,7 +80,7 @@ public class ModifyworldPermissionHandler {
             blocksDestroy.put("modifyworld.blocks.destroy." + materialPermission, true);
             blocksInteract.put("modifyworld.blocks.interact." + materialPermission, true);
         }
-        Permission blocksDestroyermission = new Permission("modifyworld.blocks.desktroy.*", blocksDestroy);
+        Permission blocksDestroyermission = new Permission("modifyworld.blocks.deskroy.*", blocksDestroy);
         pm.addPermission(blocksDestroyermission);
         Permission blocksPlacePermission = new Permission("modifyworld.blocks.place.*", blocksPlace);
         pm.addPermission(blocksPlacePermission);
