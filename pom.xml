@@ -2,18 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.tehkode</groupId>
-    <artifactId>Modifyworld</artifactId>
+    <artifactId>ModifyworldX</artifactId>
     <version>1.19.6</version>
     <name>Modifyworld</name>
-    <url>https://github.com/t3hk0d3/Modifyworld</url>
+    <url>https://github.com/daboross/Modifyworld</url>
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/t3hk0d3/Modifyworld/issues</url>
+        <url>https://github.com/daboross/Modifyworld/issues</url>
     </issueManagement>
     <scm>
-        <connection>scm:git:git://github.com/PEXPlugins/Modifyworld.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/PEXPlugins/Modifyworld.git</developerConnection>
-        <url>https://github.com/PEXPlugins/PermissionsEx.git</url>
+        <connection>scm:git:git://github.com/daboross/Modifyworld.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/daboross/Modifyworld.git</developerConnection>
+        <url>https://github.com/daboross/PermissionsEx.git</url>
     </scm>
     <build>
         <finalName>${project.artifactId}</finalName>

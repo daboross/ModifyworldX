@@ -1,7 +1,18 @@
 /*
- * Author: Dabo Ross
- * Website: www.daboross.net
- * Email: daboross@daboross.net
+ * Copyright (C) 2013 Dabo Ross <http://www.daboross.net/>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package ru.tehkode.modifyworld.bukkit;
 
@@ -10,8 +21,10 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
@@ -27,50 +40,29 @@ import ru.tehkode.modifyworld.EntityCategory;
  */
 public class ModifyworldPermissionRegister {
 
-    private final boolean useMaterialNames;
-
-    public ModifyworldPermissionRegister(boolean useMaterialNames) {
-        this.useMaterialNames = useMaterialNames;
-    }
-
-    public void registerAllPermissions() {
+    public static void registerAllPermissions() {
         PluginManager pm = Bukkit.getServer().getPluginManager();
         registerBlocks(pm);
-        registerChat(pm);
         registerBucket(pm);
         Map<String, Boolean> firstLevelNodes = getFirstLevelNodes();
         Permission modifyworldStar = new Permission("modifyworld.*", firstLevelNodes);
         pm.addPermission(modifyworldStar);
     }
 
-    private Map<String, Boolean> getFirstLevelNodes() {
+    private static Map<String, Boolean> getFirstLevelNodes() {
         Map<String, Boolean> firstLevelNodes = new HashMap<String, Boolean>(15);
-        firstLevelNodes.put("modifyworld.login", true);
-        firstLevelNodes.put("modifyworld.chat", true);
         firstLevelNodes.put("modifyworld.sneak", true);
         firstLevelNodes.put("modifyworld.sprint", true);
-        firstLevelNodes.put("modifyworld.chat.*", true);
         firstLevelNodes.put("modifyworld.usebeds", true);
         firstLevelNodes.put("modifyworld.bucket.*", true);
         firstLevelNodes.put("modifyworld.digestion", true);
-        firstLevelNodes.put("modifyworld.items.*", true);
-        firstLevelNodes.put("modifyworld.damage.*", true);
-        firstLevelNodes.put("modifyworld.mobtarget.*", true);
         firstLevelNodes.put("modifyworld.blocks.*", true);
-        firstLevelNodes.put("modifyworld.interact.*", true);
         firstLevelNodes.put("modifyworld.tame.*", true);
         firstLevelNodes.put("modifyworld.vehicle.*", true);
         return firstLevelNodes;
     }
 
-    private void registerChat(PluginManager pm) {
-        Map<String, Boolean> chatNodes = new HashMap<String, Boolean>(1);
-        chatNodes.put("modifyworld.chat.private", true);
-        Permission chatNodeStar = new Permission("modifyworld.chat.*", chatNodes);
-        pm.addPermission(chatNodeStar);
-    }
-
-    private void registerBucket(PluginManager pm) {
+    private static void registerBucket(PluginManager pm) {
         Map<String, Boolean> emptyNodes = new HashMap<String, Boolean>(2);
         emptyNodes.put("modifyworld.bucket.empty.water", true);
         emptyNodes.put("modifyworld.bucket.empty.lava", true);
@@ -88,7 +80,7 @@ public class ModifyworldPermissionRegister {
         pm.addPermission(bucketStarNode);
     }
 
-    private void registerBlocks(PluginManager pm) {
+    private static void registerBlocks(PluginManager pm) {
         Material[] materialValues = Material.values();
         Map<String, Boolean> blocksDestroy = new HashMap<String, Boolean>(materialValues.length);
         Map<String, Boolean> blocksPlace = new HashMap<String, Boolean>(materialValues.length);
@@ -112,31 +104,31 @@ public class ModifyworldPermissionRegister {
         blocksInteractPermission.addParent(blocksStarPermission, true);
     }
 
-    private String getInventoryTypePermission(InventoryType type) {
+    private static String getInventoryTypePermission(InventoryType type) {
         return formatEnumString(type.name());
     }
 
-    private String getMaterialPermission(Material type) {
-        return this.useMaterialNames ? formatEnumString(type.name()) : Integer.toString(type.getId());
+    private static String getMaterialPermission(Material type) {
+        return Integer.toString(type.getId());
     }
 
-    private String getMaterialPermission(Material type, byte metadata) {
+    private static String getMaterialPermission(Material type, byte metadata) {
         return getMaterialPermission(type) + (metadata > 0 ? ":" + metadata : "");
     }
 
-    private String getBlockPermission(Block block) {
+    private static String getBlockPermission(Block block) {
         return getMaterialPermission(block.getType(), block.getData());
     }
 
-    public String getItemPermission(ItemStack item) {
+    public static String getItemPermission(ItemStack item) {
         return getMaterialPermission(item.getType(), item.getData().getData());
     }
 
-    private String formatEnumString(String enumName) {
+    private static String formatEnumString(String enumName) {
         return enumName.toLowerCase().replace("_", "");
     }
 
-    private String getEntityName(Entity entity) {
+    private static String getEntityName(Entity entity) {
         if (entity instanceof ComplexEntityPart) {
             return getEntityName(((ComplexEntityPart) entity).getParent());
         }
@@ -155,5 +147,25 @@ public class ModifyworldPermissionRegister {
             return entityName; // category unknown (ender crystal)
         }
         return category.getNameDot() + entityName;
+    }
+
+    public static String getObjectPermission(Object obj) {
+        if (obj instanceof Entity) {
+            return (getEntityName((Entity) obj));
+        } else if (obj instanceof EntityType) {
+            return formatEnumString(((EntityType) obj).name());
+        } else if (obj instanceof BlockState) {
+            return (getBlockPermission(((BlockState) obj).getBlock()));
+        } else if (obj instanceof ItemStack) {
+            return (getItemPermission((ItemStack) obj));
+        } else if (obj instanceof Material) {
+            return (getMaterialPermission((Material) obj));
+        } else if (obj instanceof Block) {
+            return (getBlockPermission((Block) obj));
+        } else if (obj instanceof InventoryType) {
+            return getInventoryTypePermission((InventoryType) obj);
+        }
+
+        return (obj.toString());
     }
 }

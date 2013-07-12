@@ -26,7 +26,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import ru.tehkode.modifyworld.ModifyworldListener;
 import ru.tehkode.modifyworld.PlayerInformer;
 import ru.tehkode.modifyworld.handlers.BlockListener;
-import ru.tehkode.modifyworld.handlers.EntityListener;
 import ru.tehkode.modifyworld.handlers.PlayerListener;
 import ru.tehkode.modifyworld.handlers.VehicleListener;
 
@@ -46,7 +45,6 @@ public class Modifyworld extends JavaPlugin {
 
     protected final static Class<? extends ModifyworldListener>[] LISTENERS = new Class[]{
         PlayerListener.class,
-        EntityListener.class,
         BlockListener.class,
         VehicleListener.class
     };

@@ -18,15 +18,11 @@
  */
 package ru.tehkode.modifyworld;
 
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import ru.tehkode.modifyworld.bukkit.ModifyworldPermissionRegister;
 
 /**
  *
@@ -37,7 +33,6 @@ public abstract class ModifyworldListener implements Listener {
     protected PlayerInformer informer;
     protected ConfigurationSection config;
     protected boolean informPlayers = false;
-    protected boolean useMaterialNames = true;
     protected boolean checkMetadata = false;
     protected boolean checkItemUse = false;
     protected boolean enableWhitelist = false;
@@ -49,80 +44,11 @@ public abstract class ModifyworldListener implements Listener {
         this.registerEvents(plugin);
 
         this.informPlayers = config.getBoolean("informPlayers", informPlayers);
-        this.useMaterialNames = config.getBoolean("use-material-names", useMaterialNames);
         this.checkMetadata = config.getBoolean("check-metadata", checkMetadata);
         this.checkItemUse = config.getBoolean("item-use-check", checkItemUse);
         this.enableWhitelist = config.getBoolean("whitelist", enableWhitelist);
     }
 
-    private String getEntityName(Entity entity) {
-
-        if (entity instanceof ComplexEntityPart) {
-            return getEntityName(((ComplexEntityPart) entity).getParent());
-        }
-
-        String entityName = formatEnumString(entity.getType().toString());
-
-        if (entity instanceof Item) {
-            entityName = getItemPermission(((Item) entity).getItemStack());
-        }
-
-        if (entity instanceof Player) {
-            return "player." + ((Player) entity).getName();
-        } else if (entity instanceof Tameable) {
-            Tameable animal = (Tameable) entity;
-
-            return "animal." + entityName + (animal.isTamed() ? "." + animal.getOwner().getName() : "");
-        }
-
-
-        EntityCategory category = EntityCategory.fromEntity(entity);
-
-        if (category == null) {
-            return entityName; // category unknown (ender crystal)
-        }
-
-        return category.getNameDot() + entityName;
-    }
-
-    private String getInventoryTypePermission(InventoryType type) {
-        return formatEnumString(type.name());
-    }
-
-    // Functional programming fuck yeah
-    private String getMaterialPermission(Material type) {
-        return this.useMaterialNames ? formatEnumString(type.name()) : Integer.toString(type.getId());
-    }
-
-    private String getMaterialPermission(Material type, byte metadata) {
-        return getMaterialPermission(type) + (metadata > 0 ? ":" + metadata : "");
-    }
-
-    private String getBlockPermission(Block block) {
-        return getMaterialPermission(block.getType(), block.getData());
-    }
-
-    public String getItemPermission(ItemStack item) {
-        return getMaterialPermission(item.getType(), item.getData().getData());
-    }
-
-    /*
-     protected boolean permissionDenied(Player player, String basePermission, Entity entity) {
-     if (entity instanceof Player && PermissionsEx.isAvailable()) {
-     PermissionUser entityUser = PermissionsEx.getUser((Player)entity);
-
-     for (PermissionGroup group : entityUser.getGroups()) {
-     if (permissionDenied(player, basePermission, "group", group.getName())) {
-     return true;
-     }
-     }
-
-     return permissionDenied(player, basePermission, "player", entityUser.getName());
-     }
-
-     return permissionDenied(player, basePermission, entity);
-     }
-     */
     protected boolean permissionDenied(Player player, String basePermission, Object... arguments) {
         String permission = assemblePermission(basePermission, arguments);
         boolean isDenied = !player.hasPermission(permission);
@@ -148,38 +74,14 @@ public abstract class ModifyworldListener implements Listener {
                 }
 
                 builder.append('.');
-                builder.append(getObjectPermission(obj));
+                builder.append(ModifyworldPermissionRegister.getObjectPermission(obj));
             }
         }
 
         return builder.toString();
     }
 
-    protected String getObjectPermission(Object obj) {
-        if (obj instanceof Entity) {
-            return (getEntityName((Entity) obj));
-        } else if (obj instanceof EntityType) {
-            return formatEnumString(((EntityType) obj).name());
-        } else if (obj instanceof BlockState) {
-            return (getBlockPermission(((BlockState) obj).getBlock()));
-        } else if (obj instanceof ItemStack) {
-            return (getItemPermission((ItemStack) obj));
-        } else if (obj instanceof Material) {
-            return (getMaterialPermission((Material) obj));
-        } else if (obj instanceof Block) {
-            return (getBlockPermission((Block) obj));
-        } else if (obj instanceof InventoryType) {
-            return getInventoryTypePermission((InventoryType) obj);
-        }
-
-        return (obj.toString());
-    }
-
     private void registerEvents(Plugin plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-    }
-
-    private String formatEnumString(String enumName) {
-        return enumName.toLowerCase().replace("_", "");
     }
 }
