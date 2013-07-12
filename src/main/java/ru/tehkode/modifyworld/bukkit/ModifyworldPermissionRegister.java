@@ -37,6 +37,7 @@ public class ModifyworldPermissionRegister {
         PluginManager pm = Bukkit.getServer().getPluginManager();
         registerBlocks(pm);
         registerChat(pm);
+        registerBucket(pm);
         Map<String, Boolean> firstLevelNodes = getFirstLevelNodes();
         Permission modifyworldStar = new Permission("modifyworld.*", firstLevelNodes);
         pm.addPermission(modifyworldStar);
@@ -67,6 +68,24 @@ public class ModifyworldPermissionRegister {
         chatNodes.put("modifyworld.chat.private", true);
         Permission chatNodeStar = new Permission("modifyworld.chat.*", chatNodes);
         pm.addPermission(chatNodeStar);
+    }
+
+    private void registerBucket(PluginManager pm) {
+        Map<String, Boolean> emptyNodes = new HashMap<String, Boolean>(2);
+        emptyNodes.put("modifyworld.bucket.empty.water", true);
+        emptyNodes.put("modifyworld.bucket.empty.lava", true);
+        Permission bucketEmptyStarNode = new Permission("modifyworld.bucket.empty.*", emptyNodes);
+        pm.addPermission(bucketEmptyStarNode);
+        Map<String, Boolean> fillNodes = new HashMap<String, Boolean>(2);
+        fillNodes.put("modifyworld.bucket.fill.water", true);
+        fillNodes.put("modifyworld.bucket.fill.lava", true);
+        Permission bucketFillStarNode = new Permission("modifyworld.bucket.fill.*", fillNodes);
+        pm.addPermission(bucketFillStarNode);
+        Map<String, Boolean> bucketNodes = new HashMap<String, Boolean>(2);
+        bucketNodes.put("modifyworld.bucket.empty.*", true);
+        bucketNodes.put("modifyworld.bucket.fill.*", true);
+        Permission bucketStarNode = new Permission("modifyworld.bucket.*", bucketNodes);
+        pm.addPermission(bucketStarNode);
     }
 
     private void registerBlocks(PluginManager pm) {
