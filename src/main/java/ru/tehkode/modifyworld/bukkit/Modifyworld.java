@@ -37,6 +37,9 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import org.bukkit.plugin.PluginManager;
+import ru.tehkode.modifyworld.handlers.EntityListener;
+
 /**
  *
  * @author t3hk0d3
@@ -46,7 +49,8 @@ public class Modifyworld extends JavaPlugin {
     protected final static Class<? extends ModifyworldListener>[] LISTENERS = new Class[]{
         PlayerListener.class,
         BlockListener.class,
-        VehicleListener.class
+        VehicleListener.class,
+        EntityListener.class
     };
     protected List<ModifyworldListener> listeners = new ArrayList<ModifyworldListener>();
     protected PlayerInformer informer;
@@ -92,20 +96,24 @@ public class Modifyworld extends JavaPlugin {
         config.set("messages/default-message", PlayerInformer.PERMISSION_DENIED);
 
         // Predefined messages
-        config.set("messages/modifyworld.login", PlayerInformer.WHITELIST_MESSAGE);
         config.set("messages/modifyworld.items.have", PlayerInformer.PROHIBITED_ITEM);
     }
 
     protected void registerListeners() {
-        for (Class listenerClass : LISTENERS) {
+        PluginManager pm = getServer().getPluginManager();
+        for (Class<? extends ModifyworldListener> listenerClass : LISTENERS) {
+            ModifyworldListener listener;
             try {
-                Constructor constructor = listenerClass.getConstructor(Plugin.class, ConfigurationSection.class, PlayerInformer.class);
-                ModifyworldListener listener = (ModifyworldListener) constructor.newInstance(this, this.getConfig(), this.informer);
-                this.listeners.add(listener);
+                Constructor<? extends ModifyworldListener> constructor =
+                        listenerClass.getConstructor(Plugin.class, ConfigurationSection.class, PlayerInformer.class);
+                listener = constructor.newInstance(this, this.getConfig(), this.informer);
             } catch (Throwable e) {
                 this.getLogger().log(Level.WARNING, "Failed to initialize \"{0}\" listener", listenerClass.getName());
                 this.getLogger().log(Level.WARNING, "Initialization error: ", e);
+                continue;
             }
+            pm.registerEvents(listener, this);
+            this.listeners.add(listener);
         }
     }
 
@@ -114,7 +122,6 @@ public class Modifyworld extends JavaPlugin {
         if (this.config == null) {
             this.reloadConfig();
         }
-
         return this.config;
     }
 
@@ -140,7 +147,7 @@ public class Modifyworld extends JavaPlugin {
                 try {
                     this.config.load(defConfigStream);
                 } catch (Exception de) {
-                    this.getLogger().severe("Default config file is broken. Please tell this to Modifyworld author.");
+                    this.getLogger().severe("Default config file is broken.");
                 }
             }
         } catch (Exception e) {

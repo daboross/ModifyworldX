@@ -51,18 +51,14 @@ public enum EntityCategory {
         return this.name;
     }
 
-    public String getNameDot() {
-        return this.getName() + ".";
-    }
-
     public Class<? extends Entity>[] getClasses() {
         return this.classes;
     }
 
     public static EntityCategory fromEntity(Entity entity) {
-        for (Class<? extends Entity> entityClass : map.keySet()) {
-            if (entityClass.isAssignableFrom(entity.getClass())) {
-                return map.get(entityClass);
+        for (Map.Entry<Class<? extends Entity>, EntityCategory> entry : map.entrySet()) {
+            if (entry.getKey().isAssignableFrom(entity.getClass())) {
+                return entry.getValue();
             }
         }
 

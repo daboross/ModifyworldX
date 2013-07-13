@@ -42,7 +42,7 @@ public class ModifyworldPermissionRegister {
 
     public static void registerAllPermissions() {
         PluginManager pm = Bukkit.getServer().getPluginManager();
-        registerBlocks(pm);
+        registerMaterials(pm);
         registerBucket(pm);
         Map<String, Boolean> firstLevelNodes = getFirstLevelNodes();
         Permission modifyworldStar = new Permission("modifyworld.*", firstLevelNodes);
@@ -51,14 +51,13 @@ public class ModifyworldPermissionRegister {
 
     private static Map<String, Boolean> getFirstLevelNodes() {
         Map<String, Boolean> firstLevelNodes = new HashMap<String, Boolean>(15);
-        firstLevelNodes.put("modifyworld.sneak", true);
-        firstLevelNodes.put("modifyworld.sprint", true);
         firstLevelNodes.put("modifyworld.usebeds", true);
         firstLevelNodes.put("modifyworld.bucket.*", true);
         firstLevelNodes.put("modifyworld.digestion", true);
         firstLevelNodes.put("modifyworld.blocks.*", true);
         firstLevelNodes.put("modifyworld.tame.*", true);
         firstLevelNodes.put("modifyworld.vehicle.*", true);
+        firstLevelNodes.put("modifyworld.items.*", true);
         return firstLevelNodes;
     }
 
@@ -80,18 +79,28 @@ public class ModifyworldPermissionRegister {
         pm.addPermission(bucketStarNode);
     }
 
-    private static void registerBlocks(PluginManager pm) {
+    private static void registerItems(PluginManager pm) {
+    }
+
+    private static void registerMaterials(PluginManager pm) {
         Material[] materialValues = Material.values();
-        Map<String, Boolean> blocksDestroy = new HashMap<String, Boolean>(materialValues.length);
-        Map<String, Boolean> blocksPlace = new HashMap<String, Boolean>(materialValues.length);
-        Map<String, Boolean> blocksInteract = new HashMap<String, Boolean>(materialValues.length);
-        for (Material m : materialValues) {
-            String materialPermission = getMaterialPermission(m);
+        EntityType[] entityTypeValues = {EntityType.PAINTING, EntityType.ITEM_FRAME};
+        Map<String, Boolean> blocksDestroy = new HashMap<String, Boolean>(materialValues.length + entityTypeValues.length);
+        Map<String, Boolean> blocksPlace = new HashMap<String, Boolean>(materialValues.length + entityTypeValues.length);
+        Map<String, Boolean> blocksInteract = new HashMap<String, Boolean>(materialValues.length + entityTypeValues.length);
+        for (Material material : materialValues) {
+            String materialPermission = getMaterialPermission(material);
             blocksPlace.put("modifyworld.blocks.place." + materialPermission, true);
             blocksDestroy.put("modifyworld.blocks.destroy." + materialPermission, true);
             blocksInteract.put("modifyworld.blocks.interact." + materialPermission, true);
         }
-        Permission blocksDestroyermission = new Permission("modifyworld.blocks.deskroy.*", blocksDestroy);
+        for (EntityType entityType : entityTypeValues) {
+            String materialPermission = formatEnumString(entityType.name());
+            blocksPlace.put("modifyworld.blocks.place." + materialPermission, true);
+            blocksDestroy.put("modifyworld.blocks.destroy." + materialPermission, true);
+            blocksInteract.put("modifyworld.blocks.interact." + materialPermission, true);
+        }
+        Permission blocksDestroyermission = new Permission("modifyworld.blocks.destroy.*", blocksDestroy);
         pm.addPermission(blocksDestroyermission);
         Permission blocksPlacePermission = new Permission("modifyworld.blocks.place.*", blocksPlace);
         pm.addPermission(blocksPlacePermission);
@@ -112,33 +121,47 @@ public class ModifyworldPermissionRegister {
         return Integer.toString(type.getId());
     }
 
-    private static String getMaterialPermission(Material type, byte metadata) {
-        return getMaterialPermission(type) + (metadata > 0 ? ":" + metadata : "");
-    }
-
     private static String getBlockPermission(Block block) {
-        return getMaterialPermission(block.getType(), block.getData());
-    }
-
-    public static String getItemPermission(ItemStack item) {
-        return getMaterialPermission(item.getType(), item.getData().getData());
+        return getMaterialPermission(block.getType());
     }
 
     private static String formatEnumString(String enumName) {
-        return enumName.toLowerCase().replace("_", "");
+        return enumName.toLowerCase().replace('_', ' ');
     }
 
-    private static String getEntityName(Entity entity) {
-        if (entity instanceof ComplexEntityPart) {
-            return getEntityName(((ComplexEntityPart) entity).getParent());
+    public static String getPermission(Object obj) {
+        if (obj instanceof ComplexEntityPart) {
+            return getPermission((ComplexEntityPart) obj);
+        } else if (obj instanceof Entity) {
+            return (getPermission((Entity) obj));
+        } else if (obj instanceof EntityType) {
+            return getPermission((EntityType) obj);
+        } else if (obj instanceof BlockState) {
+            return (getPermission(((BlockState) obj).getBlock()));
+        } else if (obj instanceof ItemStack) {
+            return (getPermission((ItemStack) obj));
+        } else if (obj instanceof Material) {
+            return (getPermission((Material) obj));
+        } else if (obj instanceof Block) {
+            return (getPermission((Block) obj));
+        } else if (obj instanceof InventoryType) {
+            return getPermission((InventoryType) obj);
+        } else {
+            return String.valueOf(obj);
         }
-        String entityName = formatEnumString(entity.getType().toString());
-        if (entity instanceof Item) {
-            entityName = getItemPermission(((Item) entity).getItemStack());
-        }
+    }
+
+    public static String getPermission(Entity entity) {
         if (entity instanceof Player) {
-            return "player." + ((Player) entity).getName();
-        } else if (entity instanceof Tameable) {
+            return "player";
+        }
+        String entityName;
+        if (entity instanceof Item) {
+            entityName = getPermission(((Item) entity).getItemStack().getType());
+        } else {
+            entityName = formatEnumString(entity.getType().toString());
+        }
+        if (entity instanceof Tameable) {
             Tameable animal = (Tameable) entity;
             return "animal." + entityName + (animal.isTamed() ? "." + animal.getOwner().getName() : "");
         }
@@ -146,26 +169,34 @@ public class ModifyworldPermissionRegister {
         if (category == null) {
             return entityName; // category unknown (ender crystal)
         }
-        return category.getNameDot() + entityName;
+        return category.getName() + "." + entityName;
     }
 
-    public static String getObjectPermission(Object obj) {
-        if (obj instanceof Entity) {
-            return (getEntityName((Entity) obj));
-        } else if (obj instanceof EntityType) {
-            return formatEnumString(((EntityType) obj).name());
-        } else if (obj instanceof BlockState) {
-            return (getBlockPermission(((BlockState) obj).getBlock()));
-        } else if (obj instanceof ItemStack) {
-            return (getItemPermission((ItemStack) obj));
-        } else if (obj instanceof Material) {
-            return (getMaterialPermission((Material) obj));
-        } else if (obj instanceof Block) {
-            return (getBlockPermission((Block) obj));
-        } else if (obj instanceof InventoryType) {
-            return getInventoryTypePermission((InventoryType) obj);
-        }
+    public static String getPermission(EntityType entityType) {
+        return formatEnumString(entityType.name());
+    }
 
-        return (obj.toString());
+    public static String getPermission(ComplexEntityPart complexEntityPart) {
+        return getPermission(complexEntityPart.getParent());
+    }
+
+    public static String getPermission(BlockState blockState) {
+        return getPermission(blockState.getBlock());
+    }
+
+    public static String getPermission(ItemStack itemStack) {
+        return getPermission(itemStack.getType());
+    }
+
+    public static String getPermission(Material material) {
+        return getMaterialPermission(material);
+    }
+
+    public static String getPermission(Block block) {
+        return getBlockPermission(block);
+    }
+
+    public static String getPermission(InventoryType inventoryType) {
+        return getInventoryTypePermission(inventoryType);
     }
 }

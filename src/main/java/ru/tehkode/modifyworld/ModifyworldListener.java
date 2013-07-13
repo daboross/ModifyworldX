@@ -31,54 +31,42 @@ import ru.tehkode.modifyworld.bukkit.ModifyworldPermissionRegister;
 public abstract class ModifyworldListener implements Listener {
 
     protected PlayerInformer informer;
-    protected ConfigurationSection config;
-    protected boolean informPlayers = false;
-    protected boolean checkMetadata = false;
-    protected boolean checkItemUse = false;
-    protected boolean enableWhitelist = false;
 
     public ModifyworldListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
         this.informer = informer;
-        this.config = config;
-
-        this.registerEvents(plugin);
-
-        this.informPlayers = config.getBoolean("informPlayers", informPlayers);
-        this.checkMetadata = config.getBoolean("check-metadata", checkMetadata);
-        this.checkItemUse = config.getBoolean("item-use-check", checkItemUse);
-        this.enableWhitelist = config.getBoolean("whitelist", enableWhitelist);
     }
 
-    protected boolean permissionDenied(Player player, String basePermission, Object... arguments) {
-        String permission = assemblePermission(basePermission, arguments);
+    protected boolean isPermissionDeniedMessage(Player player, String permission) {
         boolean isDenied = !player.hasPermission(permission);
-
         if (isDenied) {
-            this.informer.informPlayer(player, permission, arguments);
+            this.informer.informPlayer(player, permission);
         }
-
         return isDenied;
     }
 
-    protected boolean _permissionDenied(Player player, String permission, Object... arguments) {
-        return !player.hasPermission(assemblePermission(permission, arguments));
+    protected boolean isPermissionDeniedMessage(Player player, String basePermission, Object obj) {
+        String permission = assemblePermission(basePermission, obj);
+        boolean isDenied = !player.hasPermission(permission);
+        if (isDenied) {
+            this.informer.informPlayer(player, permission, obj);
+        }
+        return isDenied;
     }
 
-    protected String assemblePermission(String permission, Object... arguments) {
-        StringBuilder builder = new StringBuilder(permission);
+    protected boolean isPermissionDenied(Player player, String permission) {
+        return !player.hasPermission(permission);
+    }
 
-        if (arguments != null) {
-            for (Object obj : arguments) {
-                if (obj == null) {
-                    continue;
-                }
+    protected boolean isPermissionDenied(Player player, String permission, Object obj) {
+        return !player.hasPermission(assemblePermission(permission, obj));
+    }
 
-                builder.append('.');
-                builder.append(ModifyworldPermissionRegister.getObjectPermission(obj));
-            }
+    protected String assemblePermission(String permission, Object obj) {
+        if (obj != null) {
+            return permission + "." + ModifyworldPermissionRegister.getPermission(obj);
+        } else {
+            return permission;
         }
-
-        return builder.toString();
     }
 
     private void registerEvents(Plugin plugin) {

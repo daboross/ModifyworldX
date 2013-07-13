@@ -11,11 +11,11 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.ChatColor;
 
 public class PlayerInformer {
 
     public final static String PERMISSION_DENIED = "Sorry, you don't have enough permissions";
-    public final static String WHITELIST_MESSAGE = "You are not allowed to join this server. Goodbye!";
     public final static String PROHIBITED_ITEM = "Prohibited item \"%s\" has been removed from your inventory.";
     public final static String DEFAULT_MESSAGE_FORMAT = "&f[&2Modifyworld&f]&4 %s";
     // Default message format
@@ -40,8 +40,6 @@ public class PlayerInformer {
 
         this.individualMessages = config.getBoolean("individual-messages", this.individualMessages);
 
-        this.importMessages(config);
-
         for (String permission : config.getKeys(true)) {
             if (!config.isString(permission)) {
                 continue;
@@ -59,87 +57,78 @@ public class PlayerInformer {
         if (messages.containsKey(permission)) {
             return messages.get(permission);
         }
-
-        String perm = permission;
+        String currentPermission = permission;
         int index;
-
-        while ((index = perm.lastIndexOf(".")) != -1) {
-            perm = perm.substring(0, index);
-
-            if (messages.containsKey(perm)) {
-                String message = messages.get(perm);
+        while ((index = currentPermission.lastIndexOf(".")) != -1) {
+            currentPermission = currentPermission.substring(0, index);
+            if (messages.containsKey(currentPermission)) {
+                String message = messages.get(currentPermission);
                 messages.put(permission, message);
                 return message;
             }
         }
-
         return this.defaultMessage;
     }
 
-    public String getMessage(Player player, String permission) {
-        return getMessage(permission);
-    }
-
-    public void informPlayer(Player player, String permission, Object... args) {
+    public void informPlayer(Player player, String permission, Object obj) {
         if (!enabled) {
             return;
         }
-
-        String message = getMessage(player, permission).replace("$permission", permission);
-
-        for (int i = 0; i < args.length; i++) {
-            message = message.replace("$" + (i + 1), describeObject(args[i]));
-        }
-
+        String message = getMessage(permission).replace("$permission", permission).replace("$1", describeObject(obj));
         if (message != null && !message.isEmpty()) {
-            player.sendMessage(String.format(messageFormat, message).replaceAll("&([a-z0-9])", "\u00A7$1"));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(messageFormat, message)));
+        }
+    }
+
+    public void informPlayer(Player player, String permission) {
+        if (!enabled) {
+            return;
+        }
+        String message = getMessage(permission).replace("$permission", permission);
+        if (message != null && !message.isEmpty()) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(messageFormat, message)));
         }
     }
 
     protected String describeObject(Object obj) {
         if (obj instanceof ComplexEntityPart) { // Complex entities
-            return describeObject(((ComplexEntityPart) obj).getParent());
+            return getDescription((ComplexEntityPart) obj);
         } else if (obj instanceof Item) { // Dropped items
-            return describeMaterial(((Item) obj).getItemStack().getType());
+            return getDescription((Item) obj);
         } else if (obj instanceof ItemStack) { // Items
-            return describeMaterial(((ItemStack) obj).getType());
+            return getDescription((ItemStack) obj);
         } else if (obj instanceof Entity) { // Entities
-            return ((Entity) obj).getType().toString().toLowerCase().replace("_", " ");
+            return getDescription((Entity) obj);
         } else if (obj instanceof Block) { // Blocks
-            return describeMaterial(((Block) obj).getType());
+            return getDescription((Block) obj);
         } else if (obj instanceof Material) { // Just material
-            return describeMaterial((Material) obj);
+            return getDescription((Material) obj);
+        } else {
+            return String.valueOf(obj);
         }
-
-        return obj.toString();
     }
 
-    private String describeMaterial(Material material) {
-        // TODO: implement data id
-
-        if (material == Material.INK_SACK) {
-            return "dye";
-        }
-
-        return material.toString().toLowerCase().replace("_", " ");
+    private String getDescription(Block block) {
+        return getDescription(block.getType());
     }
 
-    // For backward compatibility
-    private void importMessages(ConfigurationSection config) {
-        // This should NOT be refactored, because it would be stupid :D
-        if (config.isString("whitelistMessage")) {
-            setMessage("modifyworld.login", config.getString("whitelistMessage"));
-            config.set("whitelistMessage", null);
-        }
+    private String getDescription(Item item) {
+        return getDescription(item.getItemStack());
+    }
 
-        if (config.isString("prohibitedItem")) {
-            setMessage("modifyworld.items.have", config.getString("prohibitedItem"));
-            config.set("prohibitedItem", null);
-        }
+    private String getDescription(ItemStack itemStack) {
+        return getDescription(itemStack.getType());
+    }
 
-        if (config.isString("permissionDenied")) {
-            setMessage("modifyworld", config.getString("permissionDenied"));
-            config.set("permissionDenied", null);
-        }
+    private String getDescription(ComplexEntityPart complexEntityPart) {
+        return getDescription(complexEntityPart.getParent());
+    }
+
+    private String getDescription(Entity entity) {
+        return entity.getType().toString().toLowerCase().replace('_', ' ');
+    }
+
+    private String getDescription(Material material) {
+        return material.name().toLowerCase().replace('_', ' ');
     }
 }

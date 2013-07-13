@@ -1,5 +1,5 @@
 name: ModifyworldX
 main: ru.tehkode.modifyworld.bukkit.Modifyworld
 version: "${project.version}"
-author: t3hk0d3
+authors: [t3hk0d3, Dabo Ross]
 description: World modification permission ruleset
