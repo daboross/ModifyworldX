@@ -1,8 +1,8 @@
-ModifyworldX
-=======
-
 Customized fork of Modifyworld.
- * This is a highly experimental fork of Modifyworld, and probably won't end up anywhere.
+==
+
+This is a highly experimental fork of Modifyworld, and probably won't end up anywhere.
+==
 * Removes:
  * PermissionsEx integration
  * Metadata permissions
