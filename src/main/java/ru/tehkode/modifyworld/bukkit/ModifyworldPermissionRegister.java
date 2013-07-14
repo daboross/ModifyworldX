@@ -16,7 +16,6 @@
  */
 package ru.tehkode.modifyworld.bukkit;
 
-import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -28,7 +27,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
@@ -40,158 +38,142 @@ import ru.tehkode.modifyworld.EntityCategory;
  */
 public class ModifyworldPermissionRegister {
 
+	private static final String[] materialPermissions = new String[]{
+		"modifyworld.blocks.place.",
+		"modifyworld.blocks.destroy.",
+		"modifyworld.blocks.interact.",
+		"modifyworld.items.craft.",
+		"modifyworld.items.enchant.",
+		"modifyworld.items.pickup.",
+		"modifyworld.items.have.",
+		"modifyworld.items.throw."
+	};
+	private static final String[] firstLevelPermissions = new String[]{
+		"modifyworld.usebeds",
+		"modifyworld.bucket.*",
+		"modifyworld.digestion",
+		"modifyworld.blocks.*",
+		"modifyworld.tame.*",
+		"modifyworld.vehicle.*",
+		"modifyworld.items.*"
+	};
+
 	public static void registerAllPermissions() {
 		PluginManager pm = Bukkit.getServer().getPluginManager();
-		registerMaterials(pm);
-		registerBucket(pm);
-		registerItems(pm);
-		Map<String, Boolean> firstLevelNodes = getFirstLevelNodes();
-		Permission modifyworldStar = new Permission("modifyworld.*", firstLevelNodes);
-		pm.addPermission(modifyworldStar);
+		registerBlocks(pm);
+		registerBucketStar(pm);
+		registerItemsStar(pm);
+		registerBlocksHanging(pm);
+		registerAllMaterials(pm);
+		registerModifyworldStar(pm);
 	}
 
-	private static Map<String, Boolean> getFirstLevelNodes() {
-		Map<String, Boolean> firstLevelNodes = new HashMap<String, Boolean>(15);
-		firstLevelNodes.put("modifyworld.usebeds", true);
-		firstLevelNodes.put("modifyworld.bucket.*", true);
-		firstLevelNodes.put("modifyworld.digestion", true);
-		firstLevelNodes.put("modifyworld.blocks.*", true);
-		firstLevelNodes.put("modifyworld.tame.*", true);
-		firstLevelNodes.put("modifyworld.vehicle.*", true);
-		firstLevelNodes.put("modifyworld.items.*", true);
-		return firstLevelNodes;
+	private static void registerModifyworldStar(PluginManager pm) {
+		registerPermission(pm, "modifyworld.*", firstLevelPermissions);
 	}
 
-	private static void registerBucket(PluginManager pm) {
-		Map<String, Boolean> emptyNodes = new HashMap<String, Boolean>(2);
-		emptyNodes.put("modifyworld.bucket.empty.water", true);
-		emptyNodes.put("modifyworld.bucket.empty.lava", true);
-		Permission bucketEmptyStarNode = new Permission("modifyworld.bucket.empty.*", emptyNodes);
-		pm.addPermission(bucketEmptyStarNode);
-		Map<String, Boolean> fillNodes = new HashMap<String, Boolean>(2);
-		fillNodes.put("modifyworld.bucket.fill.water", true);
-		fillNodes.put("modifyworld.bucket.fill.lava", true);
-		Permission bucketFillStarNode = new Permission("modifyworld.bucket.fill.*", fillNodes);
-		pm.addPermission(bucketFillStarNode);
-		Map<String, Boolean> bucketNodes = new HashMap<String, Boolean>(2);
-		bucketNodes.put("modifyworld.bucket.empty.*", true);
-		bucketNodes.put("modifyworld.bucket.fill.*", true);
-		Permission bucketStarNode = new Permission("modifyworld.bucket.*", bucketNodes);
-		pm.addPermission(bucketStarNode);
+	private static void registerBucketStar(PluginManager pm) {
+		registerPermission(pm, "modifyworld.bucket.empty.*",
+				"modifyworld.bucket.empty.water",
+				"modifyworld.bucket.empty.lava");
+		registerPermission(pm, "modifyworld.bucket.fill.*",
+				"modifyworld.bucket.fill.water",
+				"modifyworld.bucket.fill.lava");
+		registerPermission(pm, "modifyworld.bucket.*",
+				"modifyworld.bucket.empty.*",
+				"modifyworld.bucket.fill.*");
 	}
 
-	private static void registerItems(PluginManager pm) {
-		Map<String, Boolean> craftNodes = new HashMap<String, Boolean>();
-		Map<String, Boolean> dropNodes = new HashMap<String, Boolean>();
-		Map<String, Boolean> enchantNodes = new HashMap<String, Boolean>();
-		Map<String, Boolean> haveNodes = new HashMap<String, Boolean>();
-		Map<String, Boolean> pickupNodes = new HashMap<String, Boolean>();
-		Map<String, Boolean> throwNodes = new HashMap<String, Boolean>();
-		for (Material material : Material.values()) {
-			craftNodes.put("modifyworld.items.craft." + getMaterialPermission(material), Boolean.TRUE);
-			dropNodes.put("modifyworld.items.drop." + getMaterialPermission(material), Boolean.TRUE);
-			enchantNodes.put("modifyworld.items.enchant." + getMaterialPermission(material), Boolean.TRUE);
-			haveNodes.put("modifyworld.items.have." + getMaterialPermission(material), Boolean.TRUE);
-			pickupNodes.put("modifyworld.items.pickup." + getMaterialPermission(material), Boolean.TRUE);
-			throwNodes.put("modifyworld.items.throw." + getMaterialPermission(material), Boolean.TRUE);
-			//no hold
-		}
-		Permission craftStar = new Permission("modifyworld.items..*", craftNodes);
-		pm.addPermission(craftStar);
-		Permission dropStar = new Permission("modifyworld.items..*", dropNodes);
-		pm.addPermission(dropStar);
-		Permission enchantStar = new Permission("modifyworld.items..*", enchantNodes);
-		pm.addPermission(enchantStar);
-		Permission haveStar = new Permission("modifyworld.items..*", haveNodes);
-		pm.addPermission(haveStar);
-		Permission pickupStar = new Permission("modifyworld.items..*", pickupNodes);
-		pm.addPermission(pickupStar);
-		Permission throwStar = new Permission("modifyworld.items..*", throwNodes);
-		pm.addPermission(throwStar);
-		Map<String, Boolean> itemsNodes = new HashMap<String, Boolean>();
-		itemsNodes.put("modifyworld.items.craft.*", true);
-		itemsNodes.put("modifyworld.items.drop.*", true);
-		itemsNodes.put("modifyworld.items.enchant.*", true);
-		itemsNodes.put("modifyworld.items.have.*", true);
-		itemsNodes.put("modifyworld.items.hold.*", true);
-		itemsNodes.put("modifyworld.items.pickup.*", true);
-		itemsNodes.put("modifyworld.items.throw.*", true);
-		itemsNodes.put("modifyworld.items.take.*", true);
-		itemsNodes.put("modifyworld.items.put.*", true);
-		Permission itemsStar = new Permission("modifyworld.items.*", itemsNodes);
-		pm.addPermission(itemsStar);
+	private static void registerItemsStar(PluginManager pm) {
+		registerPermission(pm, "modifyworld.items.*",
+				"modifyworld.items.craft.*",
+				"modifyworld.items.drop.*",
+				"modifyworld.items.enchant.*",
+				"modifyworld.items.have.*",
+				"modifyworld.items.pickup.*",
+				"modifyworld.items.throw.*",
+				"modifyworld.items.take.*",
+				"modifyworld.items.put.*");
 	}
 
-	private static void registerMaterials(PluginManager pm) {
+	private static void registerAllMaterials(PluginManager pm) {
 		Material[] materialValues = Material.values();
-		EntityType[] entityTypeValues = {EntityType.PAINTING, EntityType.ITEM_FRAME};
-		Map<String, Boolean> blocksDestroy = new HashMap<String, Boolean>(materialValues.length + entityTypeValues.length);
-		Map<String, Boolean> blocksPlace = new HashMap<String, Boolean>(materialValues.length + entityTypeValues.length);
-		Map<String, Boolean> blocksInteract = new HashMap<String, Boolean>(materialValues.length + entityTypeValues.length);
+		Permission[] permissions = new Permission[materialPermissions.length];
+		for (int i = 0; i < permissions.length; i++) {
+			permissions[i] = getPermission(pm, materialPermissions[i]);
+		}
 		for (Material material : materialValues) {
-			String materialPermission = getMaterialPermission(material);
-			blocksPlace.put("modifyworld.blocks.place." + materialPermission, true);
-			blocksDestroy.put("modifyworld.blocks.destroy." + materialPermission, true);
-			blocksInteract.put("modifyworld.blocks.interact." + materialPermission, true);
+			String materialPermission = getPermission(material);
+			for (int i = 0; i < permissions.length; i++) {
+				permissions[i].getChildren().put(materialPermissions[i] + materialPermission, Boolean.TRUE);
+			}
 		}
-		for (EntityType entityType : entityTypeValues) {
-			String materialPermission = formatEnumString(entityType.name());
-			blocksPlace.put("modifyworld.blocks.place." + materialPermission, true);
-			blocksDestroy.put("modifyworld.blocks.destroy." + materialPermission, true);
-			blocksInteract.put("modifyworld.blocks.interact." + materialPermission, true);
+		for (int i = 0; i < permissions.length; i++) {
+			permissions[i].recalculatePermissibles();
+			pm.addPermission(permissions[i]);
 		}
-		Permission blocksDestroyermission = new Permission("modifyworld.blocks.destroy.*", blocksDestroy);
-		pm.addPermission(blocksDestroyermission);
-		Permission blocksPlacePermission = new Permission("modifyworld.blocks.place.*", blocksPlace);
-		pm.addPermission(blocksPlacePermission);
-		Permission blocksInteractPermission = new Permission("modifyworld.blocks.interact.*", blocksPlace);
-		pm.addPermission(blocksInteractPermission);
-		Permission blocksStarPermission = new Permission("modifyworld.blocks.*");
-		pm.addPermission(blocksStarPermission);
-		blocksPlacePermission.addParent(blocksStarPermission, true);
-		blocksDestroyermission.addParent(blocksStarPermission, true);
-		blocksInteractPermission.addParent(blocksStarPermission, true);
 	}
 
-	private static String getInventoryTypePermission(InventoryType type) {
-		return formatEnumString(type.name());
-	}
-
-	private static String getMaterialPermission(Material type) {
-		return Integer.toString(type.getId());
-	}
-
-	private static String getBlockPermission(Block block) {
-		return getMaterialPermission(block.getType());
-	}
-
-	private static String formatEnumString(String enumName) {
-		return enumName.toLowerCase().replace('_', ' ');
-	}
-
-	public static String getPermission(Object obj) {
-		if (obj instanceof ComplexEntityPart) {
-			return getPermission((ComplexEntityPart) obj);
-		} else if (obj instanceof Entity) {
-			return (getPermission((Entity) obj));
-		} else if (obj instanceof EntityType) {
-			return getPermission((EntityType) obj);
-		} else if (obj instanceof BlockState) {
-			return (getPermission(((BlockState) obj).getBlock()));
-		} else if (obj instanceof ItemStack) {
-			return (getPermission((ItemStack) obj));
-		} else if (obj instanceof Material) {
-			return (getPermission((Material) obj));
-		} else if (obj instanceof Block) {
-			return (getPermission((Block) obj));
-		} else if (obj instanceof InventoryType) {
-			return getPermission((InventoryType) obj);
-		} else {
-			return String.valueOf(obj);
+	private static void registerBlocksHanging(PluginManager pm) {
+		EntityType[] hangingEntities = {EntityType.PAINTING, EntityType.ITEM_FRAME};
+		Permission blocksPlacePermission = getPermission(pm, "modifyworld.blocks.place.*");
+		Permission blocksDestroyPermission = getPermission(pm, "modifyworld.blocks.destroy.*");
+		Permission blocksInteractPermission = getPermission(pm, "modifyworld.blocks.interact.*");
+		for (EntityType entityType : hangingEntities) {
+			String materialPermission = getPermission(entityType);
+			blocksPlacePermission.getChildren().put("modifyworld.blocks.place." + materialPermission, Boolean.TRUE);
+			blocksDestroyPermission.getChildren().put("modifyworld.blocks.destroy." + materialPermission, Boolean.TRUE);
+			blocksInteractPermission.getChildren().put("modifyworld.blocks.interact." + materialPermission, Boolean.TRUE);
 		}
+		recalculatePermission(pm, blocksDestroyPermission);
+		recalculatePermission(pm, blocksPlacePermission);
+		recalculatePermission(pm, blocksInteractPermission);
+	}
+
+	private static void registerBlocks(PluginManager pm) {
+		EntityType[] extraEntityTypes = {EntityType.PAINTING, EntityType.ITEM_FRAME};
+		Permission blocksDestroyPermission = getPermission(pm, "modifyworld.blocks.destroy.*");
+		Permission blocksPlacePermission = getPermission(pm, "modifyworld.blocks.place.*");
+		Permission blocksInteractPermission = getPermission(pm, "modifyworld.blocks.interact.*");
+		for (EntityType entityType : extraEntityTypes) {
+			String materialPermission = getPermission(entityType);
+			blocksPlacePermission.getChildren().put("modifyworld.blocks.place." + materialPermission, Boolean.TRUE);
+			blocksDestroyPermission.getChildren().put("modifyworld.blocks.destroy." + materialPermission, Boolean.TRUE);
+			blocksInteractPermission.getChildren().put("modifyworld.blocks.interact." + materialPermission, Boolean.TRUE);
+		}
+		registerPermission(pm, "modifyworld.blocks.*",
+				"modifyworld.blocks.interact.*",
+				"modifyworld.blocks.place.*",
+				"modifyworld.blocks.destroy.*");
+
+	}
+
+	private static void registerPermission(PluginManager pm, String name, String... children) {
+		Permission permission = getPermission(pm, name);
+		Map<String, Boolean> childrenMap = permission.getChildren();
+		for (String child : children) {
+			childrenMap.put(child, Boolean.TRUE);
+		}
+		recalculatePermission(pm, permission);
+	}
+
+	private static Permission getPermission(PluginManager pm, String name) {
+		Permission permission = pm.getPermission(name);
+		if (permission == null) {
+			permission = new Permission(name);
+		}
+		return permission;
+	}
+
+	private static void recalculatePermission(PluginManager pm, Permission permission) {
+		permission.recalculatePermissibles();
+		pm.addPermission(permission);
 	}
 
 	public static String getPermission(Entity entity) {
+		if (entity instanceof ComplexEntityPart) {
+			return getPermission((ComplexEntityPart) entity);
+		}
 		if (entity instanceof Player) {
 			return "player";
 		}
@@ -199,7 +181,7 @@ public class ModifyworldPermissionRegister {
 		if (entity instanceof Item) {
 			entityName = getPermission(((Item) entity).getItemStack().getType());
 		} else {
-			entityName = formatEnumString(entity.getType().toString());
+			entityName = getPermission(entity.getType());
 		}
 		if (entity instanceof Tameable) {
 			Tameable animal = (Tameable) entity;
@@ -210,10 +192,6 @@ public class ModifyworldPermissionRegister {
 			return entityName; // category unknown (ender crystal)
 		}
 		return category.getName() + "." + entityName;
-	}
-
-	public static String getPermission(EntityType entityType) {
-		return formatEnumString(entityType.name());
 	}
 
 	public static String getPermission(ComplexEntityPart complexEntityPart) {
@@ -229,14 +207,14 @@ public class ModifyworldPermissionRegister {
 	}
 
 	public static String getPermission(Material material) {
-		return getMaterialPermission(material);
+		return Integer.toString(material.getId());
 	}
 
 	public static String getPermission(Block block) {
-		return getBlockPermission(block);
+		return getPermission(block.getType());
 	}
 
-	public static String getPermission(InventoryType inventoryType) {
-		return getInventoryTypePermission(inventoryType);
+	public static String getPermission(Enum enumeration) {
+		return enumeration.name().toLowerCase().replaceAll("_", "");
 	}
 }
