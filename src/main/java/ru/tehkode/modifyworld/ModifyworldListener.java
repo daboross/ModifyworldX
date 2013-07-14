@@ -18,9 +18,13 @@
  */
 package ru.tehkode.modifyworld;
 
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import ru.tehkode.modifyworld.bukkit.ModifyworldPermissionRegister;
 
@@ -30,46 +34,140 @@ import ru.tehkode.modifyworld.bukkit.ModifyworldPermissionRegister;
  */
 public abstract class ModifyworldListener implements Listener {
 
-    protected PlayerInformer informer;
+	protected PlayerInformer informer;
 
-    public ModifyworldListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
-        this.informer = informer;
-    }
+	public ModifyworldListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
+		this.informer = informer;
+	}
 
-    protected boolean isPermissionDeniedMessage(Player player, String permission) {
-        boolean isDenied = !player.hasPermission(permission);
-        if (isDenied) {
-            this.informer.informPlayer(player, permission);
-        }
-        return isDenied;
-    }
+	protected boolean isPermissionDeniedMessage(Player player, String permission) {
+		boolean isDenied = !player.hasPermission(permission);
+		if (isDenied) {
+			this.informer.informPlayer(player, permission);
+		}
+		return isDenied;
+	}
 
-    protected boolean isPermissionDeniedMessage(Player player, String basePermission, Object obj) {
-        String permission = assemblePermission(basePermission, obj);
-        boolean isDenied = !player.hasPermission(permission);
-        if (isDenied) {
-            this.informer.informPlayer(player, permission, obj);
-        }
-        return isDenied;
-    }
+	protected boolean isPermissionDenied(Player player, String permission) {
+		return !player.hasPermission(permission);
+	}
 
-    protected boolean isPermissionDenied(Player player, String permission) {
-        return !player.hasPermission(permission);
-    }
+	protected boolean isPermissionDeniedMessage(Player player, String basePermission, Entity obj) {
+		String permission = assemblePermission(basePermission, obj);
+		boolean isDenied = !player.hasPermission(permission);
+		if (isDenied) {
+			this.informer.informPlayer(player, permission, obj);
+		}
+		return isDenied;
+	}
 
-    protected boolean isPermissionDenied(Player player, String permission, Object obj) {
-        return !player.hasPermission(assemblePermission(permission, obj));
-    }
+	protected boolean isPermissionDenied(Player player, String permission, Entity obj) {
+		return !player.hasPermission(assemblePermission(permission, obj));
+	}
 
-    protected String assemblePermission(String permission, Object obj) {
-        if (obj != null) {
-            return permission + "." + ModifyworldPermissionRegister.getPermission(obj);
-        } else {
-            return permission;
-        }
-    }
+	protected String assemblePermission(String permission, Entity obj) {
+		return permission + "." + ModifyworldPermissionRegister.getPermission(obj);
+	}
 
-    private void registerEvents(Plugin plugin) {
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
-    }
+	protected boolean isPermissionDeniedMessage(Player player, String basePermission, BlockState obj) {
+		String permission = assemblePermission(basePermission, obj);
+		boolean isDenied = !player.hasPermission(permission);
+		if (isDenied) {
+			this.informer.informPlayer(player, permission, obj);
+		}
+		return isDenied;
+	}
+
+	protected boolean isPermissionDenied(Player player, String permission, BlockState obj) {
+		return !player.hasPermission(assemblePermission(permission, obj));
+	}
+
+	protected String assemblePermission(String permission, BlockState obj) {
+		return permission + "." + ModifyworldPermissionRegister.getPermission(obj);
+	}
+
+	protected boolean isPermissionDeniedMessage(Player player, String basePermission, Material obj) {
+		String permission = assemblePermission(basePermission, obj);
+		boolean isDenied = !player.hasPermission(permission);
+		if (isDenied) {
+			this.informer.informPlayer(player, permission, obj);
+		}
+		return isDenied;
+	}
+
+	protected boolean isPermissionDenied(Player player, String permission, Material obj) {
+		return !player.hasPermission(assemblePermission(permission, obj));
+	}
+
+	protected String assemblePermission(String permission, Material obj) {
+		return permission + "." + ModifyworldPermissionRegister.getPermission(obj);
+	}
+
+	protected boolean isPermissionDeniedMessage(Player player, String basePermission, Block obj) {
+		String permission = assemblePermission(basePermission, obj);
+		boolean isDenied = !player.hasPermission(permission);
+		if (isDenied) {
+			this.informer.informPlayer(player, permission, obj);
+		}
+		return isDenied;
+	}
+
+	protected boolean isPermissionDenied(Player player, String permission, Block obj) {
+		return !player.hasPermission(assemblePermission(permission, obj));
+	}
+
+	protected String assemblePermission(String permission, Block obj) {
+		return permission + "." + ModifyworldPermissionRegister.getPermission(obj);
+	}
+
+	protected boolean isPermissionDeniedMessage(Player player, String basePermission, ItemStack obj) {
+		String permission = assemblePermission(basePermission, obj);
+		boolean isDenied = !player.hasPermission(permission);
+		if (isDenied) {
+			this.informer.informPlayer(player, permission, obj);
+		}
+		return isDenied;
+	}
+
+	protected boolean isPermissionDenied(Player player, String permission, ItemStack obj) {
+		return !player.hasPermission(assemblePermission(permission, obj));
+	}
+
+	protected String assemblePermission(String permission, ItemStack obj) {
+		return permission + "." + ModifyworldPermissionRegister.getPermission(obj);
+	}
+
+	protected boolean isPermissionDeniedMessage(Player player, String basePermission, Enum obj) {
+		String permission = assemblePermission(basePermission, obj);
+		boolean isDenied = !player.hasPermission(permission);
+		if (isDenied) {
+			this.informer.informPlayer(player, permission, obj);
+		}
+		return isDenied;
+	}
+
+	protected boolean isPermissionDenied(Player player, String permission, Enum obj) {
+		return !player.hasPermission(assemblePermission(permission, obj));
+	}
+
+	protected String assemblePermission(String permission, Enum obj) {
+		return permission + "." + ModifyworldPermissionRegister.getPermission(obj);
+	}
+
+	protected boolean isPermissionDeniedMessage(Player player, String basePermission, String obj) {
+		String permission = assemblePermission(basePermission, obj);
+		boolean isDenied = !player.hasPermission(permission);
+		if (isDenied) {
+			this.informer.informPlayer(player, permission, obj);
+		}
+		return isDenied;
+	}
+
+	protected boolean isPermissionDenied(Player player, String permission, String obj) {
+		return !player.hasPermission(assemblePermission(permission, obj));
+	}
+
+	protected String assemblePermission(String permission, String obj) {
+		return permission + "." + obj.toLowerCase();
+	}
 }
