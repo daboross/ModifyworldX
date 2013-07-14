@@ -16,6 +16,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+/*
+ * Copyright (C) 2013 Dabo Ross <http://www.daboross.net/>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package ru.tehkode.modifyworld.handlers;
 
 import org.bukkit.entity.Player;
@@ -42,29 +58,24 @@ public class EntityListener extends ModifyworldListener {
         if (event instanceof EntityDamageByEntityEvent) {
             EntityDamageByEntityEvent edbe = (EntityDamageByEntityEvent) event;
 
-            Player player;
             if (edbe.getDamager() instanceof Player) { // Prevent from damaging by player
-                player = (Player) edbe.getDamager();
-                if (permissionDenied(player, "modifyworld.damage.deal", event.getEntity())) {
+                Player player = (Player) edbe.getDamager();
+                if (isPermissionDeniedMessage(player, "modifyworld.damage.deal", event.getEntity())) {
                     cancelDamageEvent(player, event);
                 }
             }
-
             if (edbe.getEntity() instanceof Player) {
-                player = (Player) edbe.getEntity();
+                Player player = (Player) edbe.getEntity();
                 if (edbe.getDamager() != null && player.isOnline()) { // Prevent from taking damage by entity
-                    if (_permissionDenied(player, "modifyworld.damage.take", edbe.getDamager())) {
+                    if (isPermissionDenied(player, "modifyworld.damage.take", edbe.getDamager())) {
                         cancelDamageEvent(player, event);
                     }
                 }
             }
-
         } else if (event.getEntity() instanceof Player) { // player are been damaged by enviroment
             Player player = (Player) event.getEntity();
-
-            if (_permissionDenied(player, "modifyworld.damage.take",  event.getCause().name().toLowerCase().replace("_", ""))) {
+            if (isPermissionDenied(player, "modifyworld.damage.take", event.getCause().name().toLowerCase().replace("_", ""))) {
                 cancelDamageEvent(player, event);
-                return;
             }
         }
     }
@@ -75,14 +86,11 @@ public class EntityListener extends ModifyworldListener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityTame(EntityTameEvent event) {
-        if (!(event.getOwner() instanceof Player)) {
-            return;
-        }
-
-        Player player = (Player) event.getOwner();
-
-        if (permissionDenied(player, "modifyworld.tame", event.getEntity())) {
-            event.setCancelled(true);
+        if ((event.getOwner() instanceof Player)) {
+            Player player = (Player) event.getOwner();
+            if (isPermissionDeniedMessage(player, "modifyworld.tame", event.getEntity())) {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -90,7 +98,7 @@ public class EntityListener extends ModifyworldListener {
     public void onEntityTarget(EntityTargetEvent event) {
         if (event.getTarget() instanceof Player) {
             Player player = (Player) event.getTarget();
-            if (_permissionDenied(player, "modifyworld.mobtarget", event.getEntity())) {
+            if (isPermissionDenied(player, "modifyworld.mobtarget", event.getEntity())) {
                 event.setCancelled(true);
             }
         }

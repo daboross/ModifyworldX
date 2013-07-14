@@ -44,195 +44,199 @@ import ru.tehkode.modifyworld.PlayerInformer;
  */
 public class PlayerListener extends ModifyworldListener {
 
-    protected boolean checkInventory = false;
-    protected boolean dropRestrictedItem = false;
+	protected boolean checkInventory = false;
+	protected boolean dropRestrictedItem = false;
 
-    public PlayerListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
-        super(plugin, config, informer);
+	public PlayerListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
+		super(plugin, config, informer);
+		this.checkInventory = config.getBoolean("item-restrictions", this.checkInventory);
+		this.dropRestrictedItem = config.getBoolean("drop-restricted-item", this.dropRestrictedItem);
+	}
 
-        this.checkInventory = config.getBoolean("item-restrictions", this.checkInventory);
-        this.dropRestrictedItem = config.getBoolean("drop-restricted-item", this.dropRestrictedItem);
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerBedEnter(PlayerBedEnterEvent event) {
+		if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.usebeds")) {
+			event.setCancelled(true);
+		}
+	}
 
-    }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
+		String bucketName;
+		Material bucket = event.getBucket();
+		if (bucket == Material.WATER_BUCKET) {
+			bucketName = "water";
+		} else if (bucket == Material.LAVA_BUCKET) {
+			bucketName = "lava";
+		} else if (bucket == Material.MILK_BUCKET) {
+			bucketName = "milk";
+		} else {
+			bucketName = bucket.name().toLowerCase().replace("_bucket", "");
+		}
+		if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.bucket.empty", bucketName)) {
+			event.setCancelled(true);
+		}
+	}
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerBedEnter(PlayerBedEnterEvent event) {
-        if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.usebeds")) {
-            event.setCancelled(true);
-        }
-    }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerBucketFill(PlayerBucketFillEvent event) {
+		Material result = event.getItemStack().getType();
+		String materialName;
+		if (result == Material.WATER_BUCKET) {
+			materialName = "water";
+		} else if (result == Material.LAVA_BUCKET) {
+			materialName = "lava";
+		} else if (result == Material.MILK_BUCKET) {
+			materialName = "milk";
+		} else {
+			materialName = result.name().toLowerCase();
+		}
+		if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.bucket.fill", materialName)) {
+			event.setCancelled(true);
+		}
+	}
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
-        String bucketName = event.getBucket().toString().toLowerCase().replace("_bucket", ""); // WATER_BUCKET -> water
-        if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.bucket.empty", bucketName)) {
-            event.setCancelled(true);
-        }
-    }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerPickupItem(PlayerPickupItemEvent event) {
+		// No inform to avoid spam
+		if (isPermissionDenied(event.getPlayer(), "modifyworld.items.pickup", event.getItem().getItemStack())) {
+			event.setCancelled(true);
+		}
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerBucketFill(PlayerBucketFillEvent event) {
-        Material result = event.getItemStack().getType();
-        String materialName;
-        if (result == Material.WATER_BUCKET) {
-            materialName = "water";
-        } else if (result == Material.LAVA_BUCKET) {
-            materialName = "lava";
-        } else if (result == Material.MILK_BUCKET) {
-            materialName = "milk";
-        } else {
-            materialName = result.name().toLowerCase();
-        }
-        if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.bucket.fill", materialName)) {
-            event.setCancelled(true);
-        }
-    }
+		this.checkPlayerInventory(event.getPlayer());
+	}
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerPickupItem(PlayerPickupItemEvent event) {
-        // No inform to avoid spam
-        if (isPermissionDenied(event.getPlayer(), "modifyworld.items.pickup", event.getItem().getItemStack())) {
-            event.setCancelled(true);
-        }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerDropItem(PlayerDropItemEvent event) {
+		if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.items.drop", event.getItemDrop().getItemStack())) {
+			event.setCancelled(true);
+		}
 
-        this.checkPlayerInventory(event.getPlayer());
-    }
+		this.checkPlayerInventory(event.getPlayer());
+	}
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerDropItem(PlayerDropItemEvent event) {
-        if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.items.drop", event.getItemDrop().getItemStack())) {
-            event.setCancelled(true);
-        }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerInventoryClick(InventoryClickEvent event) {
+		InventoryHolder holder = event.getInventory().getHolder();
+		if (holder instanceof Player || // do not track inter-inventory stuff
+				event.getRawSlot() >= event.getView().getTopInventory().getSize() || // top inventory only
+				event.getSlotType() == InventoryType.SlotType.OUTSIDE || // do not track drop
+				event.getSlot() == -999) { // temporary fix for bukkit bug (BUKKIT-2768)
+			return;
+		}
+		ItemStack take = event.getCurrentItem();
+		String action;
+		ItemStack item;
 
-        this.checkPlayerInventory(event.getPlayer());
-    }
+		if (take == null) {
+			action = "put";
+			item = event.getCursor();
+		} else {
+			action = "take";
+			item = take;
+		}
+		Player player = (Player) event.getWhoClicked();
+		if (isPermissionDeniedMessage(player, "modifyworld.items." + action, item)) {
+			event.setCancelled(true);
+		}
+	}
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerInventoryClick(InventoryClickEvent event) {
-        InventoryHolder holder = event.getInventory().getHolder();
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerInventoryEvent(InventoryClickEvent event) {
+		ItemStack item = event.getCursor();
+		if (item == null || item.getType() == Material.AIR || event.getSlotType() != InventoryType.SlotType.QUICKBAR) {
+			return;
+		}
+		Player player = (Player) event.getWhoClicked();
 
-        if (holder instanceof Player || // do not track inter-inventory stuff
-                event.getRawSlot() >= event.getView().getTopInventory().getSize() || // top inventory only
-                event.getSlotType() == InventoryType.SlotType.OUTSIDE || // do not track drop
-                event.getSlot() == -999) { // temporary fix for bukkit bug (BUKKIT-2768)
-            return;
-        }
+		int targetSlot = player.getInventory().getHeldItemSlot();
 
-        ItemStack take = event.getCurrentItem();
+		if (event.getSlot() == targetSlot && isPermissionDeniedMessage(player, "modifyworld.items.hold", item)) {
+			event.setCancelled(true);
+		}
+	}
 
-        String action;
-        ItemStack item;
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+		if (!event.isCancelled() && isPermissionDeniedMessage(event.getPlayer(), "modifyworld.interact", event.getRightClicked())) {
+			event.setCancelled(true);
+		}
+	}
 
-        if (take == null) {
-            action = "put";
-            item = event.getCursor();
-        } else {
-            action = "take";
-            item = take;
-        }
-        Player player = (Player) event.getWhoClicked();
-        if (isPermissionDeniedMessage(player, "modifyworld.items." + action, item)) {
-            event.setCancelled(true);
-        }
-    }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerInteract(PlayerInteractEvent event) {
+		Action action = event.getAction();
+		if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) { // item restriction check
+			this.checkPlayerInventory(event.getPlayer());
+		}
+		Player player = event.getPlayer();
+		if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) { //RIGHT_CLICK_AIR is cancelled by default.
+			switch (player.getItemInHand().getType()) {
+				case POTION: //Only check splash potions.
+					if ((player.getItemInHand().getDurability() & 0x4000) != 0x4000) {
+						break;
+					}
+				case EGG:
+				case SNOW_BALL:
+				case EXP_BOTTLE:
+					if (isPermissionDeniedMessage(player, "modifyworld.items.throw", player.getItemInHand())) {
+						event.setUseItemInHand(Result.DENY);
+						//Denying a potion works fine, but the client needs to be updated because it already reduced the item.
+						if (player.getItemInHand().getType() == Material.POTION) {
+							event.getPlayer().updateInventory();
+						}
+					}
+					return; // no need to check further
+				case MONSTER_EGG: // don't add MONSTER_EGGS here
+					if (isPermissionDeniedMessage(player, "modifyworld.spawn", ((SpawnEgg) player.getItemInHand().getData()).getSpawnedType())) {
+						event.setUseItemInHand(Result.DENY);
+					}
+					return; // no need to check further
+			}
+		}
+		if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK || action == Action.PHYSICAL) {
+			if (!event.isCancelled() && isPermissionDeniedMessage(player, "modifyworld.blocks.interact", event.getClickedBlock())) {
+				event.setCancelled(true);
+			}
+		}
+	}
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerInventoryEvent(InventoryClickEvent event) {
-        ItemStack item = event.getCursor();
+	@EventHandler(priority = EventPriority.LOW)
+	public void onItemEnchant(EnchantItemEvent event) {
+		if (isPermissionDeniedMessage(event.getEnchanter(), "modifyworld.items.enchant", event.getItem())) {
+			event.setCancelled(true);
+		}
+	}
 
-        if (item == null || item.getType() == Material.AIR || event.getSlotType() != InventoryType.SlotType.QUICKBAR) {
-            return;
-        }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onItemCraft(CraftItemEvent event) {
+		Player player = (Player) event.getWhoClicked();
+		if (isPermissionDeniedMessage(player, "modifyworld.items.craft", event.getRecipe().getResult())) {
+			event.setCancelled(true);
+		}
+	}
 
-        Player player = (Player) event.getWhoClicked();
+	@EventHandler(priority = EventPriority.LOW)
+	public void onFoodLevelChange(FoodLevelChangeEvent event) {
+		if ((event.getEntity() instanceof Player)
+				&& isPermissionDenied((Player) event.getEntity(), "modifyworld.digestion")) {
+			event.setCancelled(true);
+		}
+	}
 
-        int targetSlot = player.getInventory().getHeldItemSlot();
-
-        if (event.getSlot() == targetSlot && isPermissionDeniedMessage(player, "modifyworld.items.hold", item)) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        if (!event.isCancelled() && isPermissionDeniedMessage(event.getPlayer(), "modifyworld.interact", event.getRightClicked())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        Action action = event.getAction();
-        if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) { // item restriction check
-            this.checkPlayerInventory(event.getPlayer());
-        }
-        Player player = event.getPlayer();
-        if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) { //RIGHT_CLICK_AIR is cancelled by default.
-            switch (player.getItemInHand().getType()) {
-                case POTION: //Only check splash potions.
-                    if ((player.getItemInHand().getDurability() & 0x4000) != 0x4000) {
-                        break;
-                    }
-                case EGG:
-                case SNOW_BALL:
-                case EXP_BOTTLE:
-                    if (isPermissionDeniedMessage(player, "modifyworld.items.throw", player.getItemInHand())) {
-                        event.setUseItemInHand(Result.DENY);
-                        //Denying a potion works fine, but the client needs to be updated because it already reduced the item.
-                        if (player.getItemInHand().getType() == Material.POTION) {
-                            event.getPlayer().updateInventory();
-                        }
-                    }
-                    return; // no need to check further
-                case MONSTER_EGG: // don't add MONSTER_EGGS here
-                    if (isPermissionDeniedMessage(player, "modifyworld.spawn", ((SpawnEgg) player.getItemInHand().getData()).getSpawnedType())) {
-                        event.setUseItemInHand(Result.DENY);
-                    }
-                    return; // no need to check further
-            }
-        }
-        if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK || action == Action.PHYSICAL) {
-            if (!event.isCancelled() && isPermissionDeniedMessage(player, "modifyworld.blocks.interact", event.getClickedBlock())) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onItemEnchant(EnchantItemEvent event) {
-        if (isPermissionDeniedMessage(event.getEnchanter(), "modifyworld.items.enchant", event.getItem())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onItemCraft(CraftItemEvent event) {
-        Player player = (Player) event.getWhoClicked();
-        if (isPermissionDeniedMessage(player, "modifyworld.items.craft", event.getRecipe().getResult())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onFoodLevelChange(FoodLevelChangeEvent event) {
-        if ((event.getEntity() instanceof Player)
-                && isPermissionDenied((Player) event.getEntity(), "modifyworld.digestion")) {
-            event.setCancelled(true);
-        }
-    }
-
-    protected void checkPlayerInventory(Player player) {
-        if (!checkInventory) {
-            return;
-        }
-        PlayerInventory inventory = player.getInventory();
-        for (ItemStack stack : inventory.getContents()) {
-            if (stack != null && isPermissionDeniedMessage(player, "modifyworld.items.have", stack)) {
-                inventory.remove(stack);
-                if (this.dropRestrictedItem) {
-                    player.getWorld().dropItemNaturally(player.getLocation(), stack);
-                }
-            }
-        }
-    }
+	protected void checkPlayerInventory(Player player) {
+		if (!checkInventory) {
+			return;
+		}
+		PlayerInventory inventory = player.getInventory();
+		for (ItemStack stack : inventory.getContents()) {
+			if (stack != null && isPermissionDeniedMessage(player, "modifyworld.items.have", stack)) {
+				inventory.remove(stack);
+				if (this.dropRestrictedItem) {
+					System.out.println("Removed (would have) " + stack.getType().name().toLowerCase() + " from " + player);
+					//player.getWorld().dropItemNaturally(player.getLocation(), stack);
+				}
+			}
+		}
+	}
 }
