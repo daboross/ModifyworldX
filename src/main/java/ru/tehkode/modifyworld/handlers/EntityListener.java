@@ -33,58 +33,53 @@ import ru.tehkode.modifyworld.PlayerInformer;
  */
 public class EntityListener extends ModifyworldListener {
 
-    public EntityListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
-        super(plugin, config, informer);
-    }
+	public EntityListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
+		super(plugin, config, informer);
+	}
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onEntityDamage(EntityDamageEvent event) {
-        if (event instanceof EntityDamageByEntityEvent) {
-            EntityDamageByEntityEvent edbe = (EntityDamageByEntityEvent) event;
+	@EventHandler(priority = EventPriority.LOW)
+	public void onEntityDamage(EntityDamageEvent event) {
+		if (event instanceof EntityDamageByEntityEvent) {
+			EntityDamageByEntityEvent edbe = (EntityDamageByEntityEvent) event;
+			if (edbe.getDamager() instanceof Player) { // Prevent from damaging by player
+				Player player = (Player) edbe.getDamager();
+				if (isPermissionDeniedMessage(player, "modifyworld.damage.deal", event.getEntity())) {
+					event.setCancelled(true);
+				}
+			}
+			if (edbe.getEntity() instanceof Player) {
+				Player player = (Player) edbe.getEntity();
+				if (edbe.getDamager() != null && player.isOnline()) { // Prevent from taking damage by entity
+					if (isPermissionDenied(player, "modifyworld.damage.take", edbe.getDamager())) {
+						event.setCancelled(true);
+					}
+				}
+			}
+		} else if (event.getEntity() instanceof Player) { // player are being damaged by enviroment
+			Player player = (Player) event.getEntity();
+			if (isPermissionDenied(player, "modifyworld.damage.take", event.getCause())) {
+				event.setCancelled(true);
+			}
+		}
+	}
 
-            if (edbe.getDamager() instanceof Player) { // Prevent from damaging by player
-                Player player = (Player) edbe.getDamager();
-                if (isPermissionDeniedMessage(player, "modifyworld.damage.deal", event.getEntity())) {
-                    cancelDamageEvent(player, event);
-                }
-            }
-            if (edbe.getEntity() instanceof Player) {
-                Player player = (Player) edbe.getEntity();
-                if (edbe.getDamager() != null && player.isOnline()) { // Prevent from taking damage by entity
-                    if (isPermissionDenied(player, "modifyworld.damage.take", edbe.getDamager())) {
-                        cancelDamageEvent(player, event);
-                    }
-                }
-            }
-        } else if (event.getEntity() instanceof Player) { // player are been damaged by enviroment
-            Player player = (Player) event.getEntity();
-            if (isPermissionDenied(player, "modifyworld.damage.take", event.getCause())) {
-                cancelDamageEvent(player, event);
-            }
-        }
-    }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onEntityTame(EntityTameEvent event) {
+		if ((event.getOwner() instanceof Player)) {
+			Player player = (Player) event.getOwner();
+			if (isPermissionDeniedMessage(player, "modifyworld.tame", event.getEntity())) {
+				event.setCancelled(true);
+			}
+		}
+	}
 
-    protected void cancelDamageEvent(Player player, EntityDamageEvent event) {
-        event.setCancelled(true);
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onEntityTame(EntityTameEvent event) {
-        if ((event.getOwner() instanceof Player)) {
-            Player player = (Player) event.getOwner();
-            if (isPermissionDeniedMessage(player, "modifyworld.tame", event.getEntity())) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onEntityTarget(EntityTargetEvent event) {
-        if (event.getTarget() instanceof Player) {
-            Player player = (Player) event.getTarget();
-            if (isPermissionDenied(player, "modifyworld.mobtarget", event.getEntity())) {
-                event.setCancelled(true);
-            }
-        }
-    }
+	@EventHandler(priority = EventPriority.LOW)
+	public void onEntityTarget(EntityTargetEvent event) {
+		if (event.getTarget() instanceof Player) {
+			Player player = (Player) event.getTarget();
+			if (isPermissionDenied(player, "modifyworld.mobtarget", event.getEntity())) {
+				event.setCancelled(true);
+			}
+		}
+	}
 }

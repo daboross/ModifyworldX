@@ -38,109 +38,157 @@ import ru.tehkode.modifyworld.EntityCategory;
  */
 public class ModifyworldPermissionRegister {
 
-	private static final String[] materialPermissions = new String[]{
-		"modifyworld.blocks.place.",
-		"modifyworld.blocks.destroy.",
-		"modifyworld.blocks.interact.",
-		"modifyworld.items.craft.",
-		"modifyworld.items.enchant.",
-		"modifyworld.items.pickup.",
-		"modifyworld.items.have.",
-		"modifyworld.items.throw."
+	private static final String[] MATERIAL_PERMISSION_BASES = new String[]{
+		"modifyworld.blocks.place",
+		"modifyworld.blocks.destroy",
+		"modifyworld.blocks.interact",
+		"modifyworld.items.craft",
+		"modifyworld.items.enchant",
+		"modifyworld.items.pickup",
+		"modifyworld.items.have",
+		"modifyworld.items.throw"
 	};
-	private static final String[] firstLevelPermissions = new String[]{
+	private static final String[] ENTITY_PERMISSION_BASES = new String[]{
+		"modifyworld.damage.deal",
+		"modifyworld.damage.take",
+		"modifyworld.mobtarget",
+		"modifyworld.interact",
+		"modifyworld.tame" // Currently registers tame for all entities.
+	};
+	private static final String[] VEHICLE_PERMISSION_BASES = new String[]{
+		"modifyworld.vehicle.enter",
+		"modifyworld.vehicle.destroy",
+		"modifyworld.vehicle.collide"
+	};
+	private static final String[] HANGING_PERMISSION_BASES = new String[]{
+		"modifyworld.blocks.place",
+		"modifyworld.blocks.destroy",
+		"modifyworld.blocks.interact"
+	};
+	private static final String[] MODIFYWORLD_STAR_CHILDREN = new String[]{
 		"modifyworld.usebeds",
 		"modifyworld.bucket.*",
 		"modifyworld.digestion",
 		"modifyworld.blocks.*",
 		"modifyworld.tame.*",
 		"modifyworld.vehicle.*",
-		"modifyworld.items.*"
+		"modifyworld.items.*",
+		"modifyworld.mobtarget.*",
+		"modifyworld.tame.*",
+		"modifyworld.damage.*"
+	};
+	private static final String[] ITEMS_STAR_CHILDREN = new String[]{
+		"modifyworld.items.craft.*",
+		"modifyworld.items.drop.*",
+		"modifyworld.items.enchant.*",
+		"modifyworld.items.have.*",
+		"modifyworld.items.pickup.*",
+		"modifyworld.items.throw.*",
+		"modifyworld.items.take.*",
+		"modifyworld.items.put.*"
 	};
 
 	public static void registerAllPermissions() {
 		PluginManager pm = Bukkit.getServer().getPluginManager();
-		registerBlocks(pm);
 		registerBucketStar(pm);
 		registerItemsStar(pm);
+		registerAllMaterial(pm);
 		registerBlocksHanging(pm);
-		registerAllMaterials(pm);
+		registerBlocks(pm);
+		registerAllEntity(pm);
+		registerVehicle(pm);
 		registerModifyworldStar(pm);
 	}
 
 	private static void registerModifyworldStar(PluginManager pm) {
-		registerPermission(pm, "modifyworld.*", firstLevelPermissions);
+		registerPermission(pm, "modifyworld.*", MODIFYWORLD_STAR_CHILDREN);
 	}
 
 	private static void registerBucketStar(PluginManager pm) {
 		registerPermission(pm, "modifyworld.bucket.empty.*",
 				"modifyworld.bucket.empty.water",
-				"modifyworld.bucket.empty.lava");
+				"modifyworld.bucket.empty.lava",
+				"modifyworld.bucket.empty.milk");
 		registerPermission(pm, "modifyworld.bucket.fill.*",
 				"modifyworld.bucket.fill.water",
-				"modifyworld.bucket.fill.lava");
+				"modifyworld.bucket.fill.lava",
+				"modifyworld.bucket.fill.milk");
 		registerPermission(pm, "modifyworld.bucket.*",
 				"modifyworld.bucket.empty.*",
 				"modifyworld.bucket.fill.*");
 	}
 
 	private static void registerItemsStar(PluginManager pm) {
-		registerPermission(pm, "modifyworld.items.*",
-				"modifyworld.items.craft.*",
-				"modifyworld.items.drop.*",
-				"modifyworld.items.enchant.*",
-				"modifyworld.items.have.*",
-				"modifyworld.items.pickup.*",
-				"modifyworld.items.throw.*",
-				"modifyworld.items.take.*",
-				"modifyworld.items.put.*");
+		registerPermission(pm, "modifyworld.items.*", ITEMS_STAR_CHILDREN);
 	}
 
-	private static void registerAllMaterials(PluginManager pm) {
+	private static void registerAllMaterial(PluginManager pm) {
 		Material[] materialValues = Material.values();
-		Permission[] permissions = new Permission[materialPermissions.length];
+		Permission[] permissions = new Permission[MATERIAL_PERMISSION_BASES.length];
 		for (int i = 0; i < permissions.length; i++) {
-			permissions[i] = getPermission(pm, materialPermissions[i]);
+			permissions[i] = getPermission(pm, MATERIAL_PERMISSION_BASES[i] + ".*");
 		}
 		for (Material material : materialValues) {
 			String materialPermission = getPermission(material);
 			for (int i = 0; i < permissions.length; i++) {
-				permissions[i].getChildren().put(materialPermissions[i] + materialPermission, Boolean.TRUE);
+				permissions[i].getChildren().put(MATERIAL_PERMISSION_BASES[i] + "." + materialPermission, Boolean.TRUE);
 			}
 		}
 		for (int i = 0; i < permissions.length; i++) {
-			permissions[i].recalculatePermissibles();
 			pm.addPermission(permissions[i]);
+			permissions[i].recalculatePermissibles();
+		}
+	}
+
+	private static void registerAllEntity(PluginManager pm) {
+		EntityType[] values = EntityType.values();
+		Permission[] permissions = new Permission[ENTITY_PERMISSION_BASES.length];
+		for (int i = 0; i < permissions.length; i++) {
+			permissions[i] = getPermission(pm, ENTITY_PERMISSION_BASES[i] + ".*");
+		}
+		for (EntityType entityType : values) {
+			String permission = getPermission(entityType);
+			for (int i = 0; i < permissions.length; i++) {
+				permissions[i].getChildren().put(ENTITY_PERMISSION_BASES[i] + "." + permission, Boolean.TRUE);
+			}
+		}
+		for (int i = 0; i < permissions.length; i++) {
+			pm.addPermission(permissions[i]);
+			permissions[i].recalculatePermissibles();
+		}
+	}
+
+	private static void registerVehicle(PluginManager pm) {
+		registerPermission(pm, "modifyworld.vehicle.*",
+				"modifyworld.vehicle.enter.*",
+				"modifyworld.vehicle.destroy.*",
+				"modifyworld.vehicle.collide.*");
+		for (String permission : VEHICLE_PERMISSION_BASES) {
+			registerPermission(pm, permission + ".*",
+					permission + ".minecart",
+					permission + ".boat");
 		}
 	}
 
 	private static void registerBlocksHanging(PluginManager pm) {
-		EntityType[] hangingEntities = {EntityType.PAINTING, EntityType.ITEM_FRAME};
-		Permission blocksPlacePermission = getPermission(pm, "modifyworld.blocks.place.*");
-		Permission blocksDestroyPermission = getPermission(pm, "modifyworld.blocks.destroy.*");
-		Permission blocksInteractPermission = getPermission(pm, "modifyworld.blocks.interact.*");
-		for (EntityType entityType : hangingEntities) {
-			String materialPermission = getPermission(entityType);
-			blocksPlacePermission.getChildren().put("modifyworld.blocks.place." + materialPermission, Boolean.TRUE);
-			blocksDestroyPermission.getChildren().put("modifyworld.blocks.destroy." + materialPermission, Boolean.TRUE);
-			blocksInteractPermission.getChildren().put("modifyworld.blocks.interact." + materialPermission, Boolean.TRUE);
+		EntityType[] values = {EntityType.PAINTING, EntityType.ITEM_FRAME};
+		Permission[] permissions = new Permission[HANGING_PERMISSION_BASES.length];
+		for (int i = 0; i < permissions.length; i++) {
+			permissions[i] = getPermission(pm, HANGING_PERMISSION_BASES[i] + ".*");
 		}
-		recalculatePermission(pm, blocksDestroyPermission);
-		recalculatePermission(pm, blocksPlacePermission);
-		recalculatePermission(pm, blocksInteractPermission);
+		for (EntityType entityType : values) {
+			String permission = getPermission(entityType);
+			for (int i = 0; i < permissions.length; i++) {
+				permissions[i].getChildren().put(HANGING_PERMISSION_BASES[i] + "." + permission, Boolean.TRUE);
+			}
+		}
+		for (int i = 0; i < permissions.length; i++) {
+			pm.addPermission(permissions[i]);
+			permissions[i].recalculatePermissibles();
+		}
 	}
 
 	private static void registerBlocks(PluginManager pm) {
-		EntityType[] extraEntityTypes = {EntityType.PAINTING, EntityType.ITEM_FRAME};
-		Permission blocksDestroyPermission = getPermission(pm, "modifyworld.blocks.destroy.*");
-		Permission blocksPlacePermission = getPermission(pm, "modifyworld.blocks.place.*");
-		Permission blocksInteractPermission = getPermission(pm, "modifyworld.blocks.interact.*");
-		for (EntityType entityType : extraEntityTypes) {
-			String materialPermission = getPermission(entityType);
-			blocksPlacePermission.getChildren().put("modifyworld.blocks.place." + materialPermission, Boolean.TRUE);
-			blocksDestroyPermission.getChildren().put("modifyworld.blocks.destroy." + materialPermission, Boolean.TRUE);
-			blocksInteractPermission.getChildren().put("modifyworld.blocks.interact." + materialPermission, Boolean.TRUE);
-		}
 		registerPermission(pm, "modifyworld.blocks.*",
 				"modifyworld.blocks.interact.*",
 				"modifyworld.blocks.place.*",
@@ -166,8 +214,15 @@ public class ModifyworldPermissionRegister {
 	}
 
 	private static void recalculatePermission(PluginManager pm, Permission permission) {
-		permission.recalculatePermissibles();
-		pm.addPermission(permission);
+		Permission old = pm.getPermission(permission.getName());
+		if (old == null) {
+			pm.addPermission(permission);
+			permission.recalculatePermissibles();
+		} else if (old == permission) {
+			permission.recalculatePermissibles();
+		} else {
+			throw new IllegalArgumentException("Permission already registered!: " + permission.getName());
+		}
 	}
 
 	public static String getPermission(Entity entity) {
