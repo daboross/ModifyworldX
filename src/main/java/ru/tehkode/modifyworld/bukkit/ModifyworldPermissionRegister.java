@@ -43,7 +43,9 @@ public class ModifyworldPermissionRegister {
 		"modifyworld.items.pickup",
 		"modifyworld.items.have",
 		"modifyworld.items.throw",
-		"modifyworld.items.drop"
+		"modifyworld.items.drop",
+		"modifyworld.items.put",
+		"modifyworld.items.take"
 	};
 	private static final String[] ENTITY_PERMISSION_BASES = new String[]{
 		"modifyworld.damage.deal",
