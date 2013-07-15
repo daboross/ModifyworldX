@@ -131,8 +131,7 @@ public class ModifyworldPermissionRegister {
 			}
 		}
 		for (int i = 0; i < permissions.length; i++) {
-			pm.addPermission(permissions[i]);
-			permissions[i].recalculatePermissibles();
+			recalculatePermission(pm, permissions[i]);
 		}
 	}
 
@@ -149,8 +148,7 @@ public class ModifyworldPermissionRegister {
 			}
 		}
 		for (int i = 0; i < permissions.length; i++) {
-			pm.addPermission(permissions[i]);
-			permissions[i].recalculatePermissibles();
+			recalculatePermission(pm, permissions[i]);
 		}
 	}
 
@@ -179,8 +177,7 @@ public class ModifyworldPermissionRegister {
 			}
 		}
 		for (int i = 0; i < permissions.length; i++) {
-			pm.addPermission(permissions[i]);
-			permissions[i].recalculatePermissibles();
+			recalculatePermission(pm, permissions[i]);
 		}
 	}
 
