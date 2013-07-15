@@ -24,13 +24,9 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Tameable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
-import ru.tehkode.modifyworld.EntityCategory;
 
 /**
  *
@@ -229,24 +225,25 @@ public class ModifyworldPermissionRegister {
 		if (entity instanceof ComplexEntityPart) {
 			return getPermission((ComplexEntityPart) entity);
 		}
-		if (entity instanceof Player) {
-			return "player";
-		}
-		String entityName;
-		if (entity instanceof Item) {
-			entityName = getPermission(((Item) entity).getItemStack().getType());
-		} else {
-			entityName = getPermission(entity.getType());
-		}
-		if (entity instanceof Tameable) {
-			Tameable animal = (Tameable) entity;
-			return "animal." + entityName + (animal.isTamed() ? "." + animal.getOwner().getName() : "");
-		}
-		EntityCategory category = EntityCategory.fromEntity(entity);
-		if (category == null) {
-			return entityName; // category unknown (ender crystal)
-		}
-		return category.getName() + "." + entityName;
+		return getPermission(entity.getType());
+//		if (entity instanceof Player) {
+//			return "player";
+//		}
+//		String entityName;
+//		if (entity instanceof Item) {
+//			entityName = getPermission(((Item) entity).getItemStack().getType());
+//		} else {
+//			entityName = getPermission(entity.getType());
+//		}
+//		if (entity instanceof Tameable) {
+//			Tameable animal = (Tameable) entity;
+//			return "animal." + entityName + (animal.isTamed() ? "." + animal.getOwner().getName() : "");
+//		}
+//		EntityCategory category = EntityCategory.fromEntity(entity);
+//		if (category == null) {
+//			return entityName; // category unknown (ender crystal)
+//		}
+//		return category.getName() + "." + entityName;
 	}
 
 	public static String getPermission(ComplexEntityPart complexEntityPart) {
