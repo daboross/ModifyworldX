@@ -42,7 +42,8 @@ public class ModifyworldPermissionRegister {
 		"modifyworld.items.enchant",
 		"modifyworld.items.pickup",
 		"modifyworld.items.have",
-		"modifyworld.items.throw"
+		"modifyworld.items.throw",
+		"modifyworld.items.drop"
 	};
 	private static final String[] ENTITY_PERMISSION_BASES = new String[]{
 		"modifyworld.damage.deal",

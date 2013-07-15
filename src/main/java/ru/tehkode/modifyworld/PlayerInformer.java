@@ -1,6 +1,5 @@
 package ru.tehkode.modifyworld;
 
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.ComplexEntityPart;
@@ -12,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.ChatColor;
+import org.bukkit.block.BlockState;
 
 public class PlayerInformer {
 
@@ -70,16 +70,6 @@ public class PlayerInformer {
 		return this.defaultMessage;
 	}
 
-	public void informPlayer(Player player, String permission, Object obj) {
-		if (!enabled) {
-			return;
-		}
-		String message = getMessage(permission).replace("$permission", permission).replace("$1", describeObject(obj));
-		if (!message.isEmpty()) {
-			player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(messageFormat, message)));
-		}
-	}
-
 	public void informPlayer(Player player, String permission) {
 		if (!enabled) {
 			return;
@@ -90,26 +80,71 @@ public class PlayerInformer {
 		}
 	}
 
-	protected String describeObject(Object obj) {
-		if (obj instanceof ComplexEntityPart) { // Complex entities
-			return getDescription((ComplexEntityPart) obj);
-		} else if (obj instanceof Item) { // Dropped items
-			return getDescription((Item) obj);
-		} else if (obj instanceof ItemStack) { // Items
-			return getDescription((ItemStack) obj);
-		} else if (obj instanceof Entity) { // Entities
-			return getDescription((Entity) obj);
-		} else if (obj instanceof Block) { // Blocks
-			return getDescription((Block) obj);
-		} else if (obj instanceof Material) { // Just material
-			return getDescription((Material) obj);
-		} else {
-			return String.valueOf(obj);
+	public void informPlayer(Player player, String permission, Block block) {
+		if (!enabled) {
+			return;
+		}
+		informPlayer(player, permission, getDescription(block));
+	}
+
+	public void informPlayer(Player player, String permission, BlockState blockState) {
+		if (!enabled) {
+			return;
+		}
+		informPlayer(player, permission, getDescription(blockState));
+	}
+
+	public void informPlayer(Player player, String permission, Item item) {
+		if (!enabled) {
+			return;
+		}
+		informPlayer(player, permission, getDescription(item));
+	}
+
+	public void informPlayer(Player player, String permission, ItemStack itemStack) {
+		if (!enabled) {
+			return;
+		}
+		informPlayer(player, permission, getDescription(itemStack));
+	}
+
+	public void informPlayer(Player player, String permission, ComplexEntityPart complexEntityPart) {
+		if (!enabled) {
+			return;
+		}
+		informPlayer(player, permission, getDescription(complexEntityPart));
+	}
+
+	public void informPlayer(Player player, String permission, Entity entity) {
+		if (!enabled) {
+			return;
+		}
+		informPlayer(player, permission, getDescription(entity));
+	}
+
+	public void informPlayer(Player player, String permission, Enum enumeration) {
+		if (!enabled) {
+			return;
+		}
+		informPlayer(player, permission, getDescription(enumeration));
+	}
+
+	public void informPlayer(Player player, String permission, String string) {
+		if (!enabled) {
+			return;
+		}
+		String message = getMessage(permission).replace("$permission", permission).replace("$1", string);
+		if (!message.isEmpty()) {
+			player.sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(messageFormat, message)));
 		}
 	}
 
 	private String getDescription(Block block) {
 		return getDescription(block.getType());
+	}
+
+	private String getDescription(BlockState block) {
+		return getDescription(block.getBlock().getType());
 	}
 
 	private String getDescription(Item item) {
@@ -128,7 +163,7 @@ public class PlayerInformer {
 		return entity.getType().toString().toLowerCase().replace('_', ' ');
 	}
 
-	private String getDescription(Material material) {
-		return material.name().toLowerCase().replace('_', ' ');
+	private String getDescription(Enum enumuration) {
+		return enumuration.name().toLowerCase().replace('_', ' ');
 	}
 }

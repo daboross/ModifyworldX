@@ -112,7 +112,6 @@ public class PlayerListener extends ModifyworldListener {
 		if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.items.drop", event.getItemDrop().getItemStack())) {
 			event.setCancelled(true);
 		}
-
 		this.checkPlayerInventory(event.getPlayer());
 	}
 
