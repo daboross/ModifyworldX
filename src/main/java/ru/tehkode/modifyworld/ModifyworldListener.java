@@ -34,9 +34,11 @@ import ru.tehkode.modifyworld.bukkit.ModifyworldPermissionRegister;
  */
 public abstract class ModifyworldListener implements Listener {
 
-	protected PlayerInformer informer;
+	protected final PlayerInformer informer;
+	protected final Plugin plugin;
 
 	public ModifyworldListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
+		this.plugin = plugin;
 		this.informer = informer;
 	}
 

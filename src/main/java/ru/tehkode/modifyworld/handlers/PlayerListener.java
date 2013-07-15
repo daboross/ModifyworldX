@@ -18,6 +18,7 @@
  */
 package ru.tehkode.modifyworld.handlers;
 
+import java.util.logging.Level;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -231,11 +232,11 @@ public class PlayerListener extends ModifyworldListener {
 		PlayerInventory inventory = player.getInventory();
 		for (ItemStack stack : inventory.getContents()) {
 			if (stack != null && isPermissionDeniedMessage(player, "modifyworld.items.have", stack)) {
-				inventory.remove(stack);
-				if (this.dropRestrictedItem) {
-					System.out.println("Removed (would have) " + stack.getType().name().toLowerCase() + " from " + player);
-					//player.getWorld().dropItemNaturally(player.getLocation(), stack);
-				}
+				plugin.getLogger().log(Level.INFO, "Would have removed {0} from {1}", new Object[]{stack.getType().name().toLowerCase(), player});
+//				inventory.remove(stack);
+//				if (this.dropRestrictedItem) {
+//					player.getWorld().dropItemNaturally(player.getLocation(), stack);
+//				}
 			}
 		}
 	}
