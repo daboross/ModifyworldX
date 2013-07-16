@@ -229,7 +229,7 @@ public class ModifyworldPermissionRegister {
 		} else if (old == permission) {
 			permission.recalculatePermissibles();
 		} else {
-			throw new IllegalArgumentException("Permission already registered!: " + permission.getName());
+			throw new IllegalArgumentException("Permission already registered " + permission.getName());
 		}
 	}
 
