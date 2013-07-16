@@ -49,7 +49,7 @@ public class ModifyworldPermissionRegister {
 		"modifyworld.items.put",
 		"modifyworld.items.take"
 	};
-	private static final String[] ENTITY_PERMISSION_BASES = new String[]{
+	private static final String[] ENTITY_TYPE_PERMISSION_BASES = new String[]{
 		"modifyworld.damage.deal",
 		"modifyworld.damage.take",
 		"modifyworld.mobtarget",
@@ -106,7 +106,7 @@ public class ModifyworldPermissionRegister {
 		registerMaterial(pm);
 		registerHanging(pm);
 		registerBlockStar(pm);
-		registerEntity(pm);
+		registerEntityTypes(pm);
 		registerVehicle(pm);
 		registerModifyworldStar(pm);
 	}
@@ -170,16 +170,16 @@ public class ModifyworldPermissionRegister {
 		}
 	}
 
-	private static void registerEntity(PluginManager pm) {
+	private static void registerEntityTypes(PluginManager pm) {
 		EntityType[] values = EntityType.values();
-		Permission[] permissions = new Permission[ENTITY_PERMISSION_BASES.length];
+		Permission[] permissions = new Permission[ENTITY_TYPE_PERMISSION_BASES.length];
 		for (int i = 0; i < permissions.length; i++) {
-			permissions[i] = getPermission(pm, ENTITY_PERMISSION_BASES[i] + ".*");
+			permissions[i] = getPermission(pm, ENTITY_TYPE_PERMISSION_BASES[i] + ".*");
 		}
 		for (EntityType entityType : values) {
 			String permission = getPermission(entityType);
 			for (int i = 0; i < permissions.length; i++) {
-				permissions[i].getChildren().put(ENTITY_PERMISSION_BASES[i] + "." + permission, Boolean.TRUE);
+				permissions[i].getChildren().put(ENTITY_TYPE_PERMISSION_BASES[i] + "." + permission, Boolean.TRUE);
 			}
 		}
 		for (int i = 0; i < permissions.length; i++) {
@@ -237,15 +237,15 @@ public class ModifyworldPermissionRegister {
 		if (entity instanceof ComplexEntityPart) {
 			return getPermission((ComplexEntityPart) entity);
 		}
-		if (entity instanceof Player) {
-			return "player." + ((Player) entity).getName();
-		}
 		if (entity instanceof Item) {
 			return getPermission(((Item) entity).getItemStack());
 //		} else if (entity instanceof Tameable && ((Tameable) entity).isTamed()) {
 //			return getPermission(entity.getType()) + "." + ((Tameable) entity).getOwner().getName();
+//		} else if (entity instanceof Player) {
+//			return "player." + ((Player) entity).getName();
+		} else {
+			return getPermission(entity.getType());
 		}
-		return getPermission(entity.getType());
 
 	}
 
