@@ -17,7 +17,7 @@
 package ru.tehkode.modifyworld.bukkit;
 
 import java.util.Map;
-import org.bukkit.Bukkit;
+import java.util.logging.Level;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -25,9 +25,9 @@ import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
 /**
@@ -97,18 +97,31 @@ public class ModifyworldPermissionRegister {
 		"modifyworld.blocks.place.*",
 		"modifyworld.blocks.destroy.*"
 	};
+	private static final EntityType[] VEHICLES = new EntityType[]{
+		EntityType.MINECART,
+		EntityType.MINECART_CHEST,
+		EntityType.MINECART_FURNACE,
+		EntityType.MINECART_HOPPER,
+		EntityType.MINECART_MOB_SPAWNER,
+		EntityType.MINECART_TNT,
+		EntityType.BOAT
+	};
 
-	public static void registerAllPermissions() {
-		PluginManager pm = Bukkit.getServer().getPluginManager();
-		registerBucket(pm);
-		registerItemsStar(pm);
-		registerDamageStar(pm);
-		registerMaterial(pm);
-		registerHanging(pm);
-		registerBlockStar(pm);
-		registerEntityTypes(pm);
-		registerVehicle(pm);
-		registerModifyworldStar(pm);
+	public static void registerAllPermissions(Plugin plugin) {
+		PluginManager pm = plugin.getServer().getPluginManager();
+		try {
+			registerBucket(pm);
+			registerItemsStar(pm);
+			registerDamageStar(pm);
+			registerMaterial(pm);
+			registerHanging(pm);
+			registerBlockStar(pm);
+			registerEntityTypes(pm);
+			registerVehicle(pm);
+			registerModifyworldStar(pm);
+		} catch (IllegalArgumentException ex) {
+			plugin.getLogger().log(Level.WARNING, "Failed to register permissions with error", ex);
+		}
 	}
 
 	private static void registerModifyworldStar(PluginManager pm) {
@@ -146,10 +159,12 @@ public class ModifyworldPermissionRegister {
 				"modifyworld.vehicle.enter.*",
 				"modifyworld.vehicle.destroy.*",
 				"modifyworld.vehicle.collide.*");
-		for (String permission : VEHICLE_PERMISSION_BASES) {
-			registerPermission(pm, permission + ".*",
-					permission + ".minecart",
-					permission + ".boat");
+		for (String permissionString : VEHICLE_PERMISSION_BASES) {
+			Permission permission = getPermission(pm, permissionString + ".*");
+			for (EntityType vehicle : VEHICLES) {
+				permission.getChildren().put(permissionString + "." + getPermission(vehicle), Boolean.TRUE);
+			}
+			recalculatePermission(pm, permission);
 		}
 	}
 
