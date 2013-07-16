@@ -106,6 +106,10 @@ public class ModifyworldPermissionRegister {
 		EntityType.MINECART_TNT,
 		EntityType.BOAT
 	};
+	private static final EntityType[] HANGING_ENTITIES = new EntityType[]{
+		EntityType.PAINTING,
+		EntityType.ITEM_FRAME
+	};
 
 	public static void registerAllPermissions(Plugin plugin) {
 		PluginManager pm = plugin.getServer().getPluginManager();
@@ -114,7 +118,7 @@ public class ModifyworldPermissionRegister {
 			registerItemsStar(pm);
 			registerDamageStar(pm);
 			registerMaterial(pm);
-			registerHanging(pm);
+			registerHangingEntities(pm);
 			registerBlockStar(pm);
 			registerEntityTypes(pm);
 			registerVehicle(pm);
@@ -202,13 +206,12 @@ public class ModifyworldPermissionRegister {
 		}
 	}
 
-	private static void registerHanging(PluginManager pm) {
-		EntityType[] values = {EntityType.PAINTING, EntityType.ITEM_FRAME};
+	private static void registerHangingEntities(PluginManager pm) {
 		Permission[] permissions = new Permission[HANGING_PERMISSION_BASES.length];
 		for (int i = 0; i < permissions.length; i++) {
 			permissions[i] = getPermission(pm, HANGING_PERMISSION_BASES[i] + ".*");
 		}
-		for (EntityType entityType : values) {
+		for (EntityType entityType : HANGING_ENTITIES) {
 			String permission = getPermission(entityType);
 			for (int i = 0; i < permissions.length; i++) {
 				permissions[i].getChildren().put(HANGING_PERMISSION_BASES[i] + "." + permission, Boolean.TRUE);
