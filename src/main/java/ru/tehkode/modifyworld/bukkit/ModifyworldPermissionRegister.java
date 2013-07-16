@@ -24,6 +24,9 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
@@ -52,7 +55,7 @@ public class ModifyworldPermissionRegister {
 		"modifyworld.damage.take",
 		"modifyworld.mobtarget",
 		"modifyworld.interact",
-		"modifyworld.tame" // Currently registers tame for all entities.
+		"modifyworld.tame" // TODO find a way to get only tamable entites for this.
 	};
 	private static final String[] VEHICLE_PERMISSION_BASES = new String[]{
 		"modifyworld.vehicle.enter",
@@ -86,15 +89,25 @@ public class ModifyworldPermissionRegister {
 		"modifyworld.items.take.*",
 		"modifyworld.items.put.*"
 	};
+	private static final String[] DAMAGE_STAR_CHILDREN = new String[]{
+		"modifyworld.damage.deal.*",
+		"modifyworld.damage.take.*"
+	};
+	private static final String[] BLOCKS_STAR_CHILDREN = new String[]{
+		"modifyworld.blocks.interact.*",
+		"modifyworld.blocks.place.*",
+		"modifyworld.blocks.destroy.*"
+	};
 
 	public static void registerAllPermissions() {
 		PluginManager pm = Bukkit.getServer().getPluginManager();
-		registerBucketStar(pm);
+		registerBucket(pm);
 		registerItemsStar(pm);
-		registerAllMaterial(pm);
-		registerBlocksHanging(pm);
-		registerBlocks(pm);
-		registerAllEntity(pm);
+		registerDamageStar(pm);
+		registerMaterial(pm);
+		registerHanging(pm);
+		registerBlockStar(pm);
+		registerEntity(pm);
 		registerVehicle(pm);
 		registerModifyworldStar(pm);
 	}
@@ -103,7 +116,19 @@ public class ModifyworldPermissionRegister {
 		registerPermission(pm, "modifyworld.*", MODIFYWORLD_STAR_CHILDREN);
 	}
 
-	private static void registerBucketStar(PluginManager pm) {
+	private static void registerItemsStar(PluginManager pm) {
+		registerPermission(pm, "modifyworld.items.*", ITEMS_STAR_CHILDREN);
+	}
+
+	private static void registerDamageStar(PluginManager pm) {
+		registerPermission(pm, "modifyworld.damage.*", DAMAGE_STAR_CHILDREN);
+	}
+
+	private static void registerBlockStar(PluginManager pm) {
+		registerPermission(pm, "modifyworld.blocks.*", BLOCKS_STAR_CHILDREN);
+	}
+
+	private static void registerBucket(PluginManager pm) {
 		registerPermission(pm, "modifyworld.bucket.empty.*",
 				"modifyworld.bucket.empty.water",
 				"modifyworld.bucket.empty.lava",
@@ -117,11 +142,19 @@ public class ModifyworldPermissionRegister {
 				"modifyworld.bucket.fill.*");
 	}
 
-	private static void registerItemsStar(PluginManager pm) {
-		registerPermission(pm, "modifyworld.items.*", ITEMS_STAR_CHILDREN);
+	private static void registerVehicle(PluginManager pm) {
+		registerPermission(pm, "modifyworld.vehicle.*",
+				"modifyworld.vehicle.enter.*",
+				"modifyworld.vehicle.destroy.*",
+				"modifyworld.vehicle.collide.*");
+		for (String permission : VEHICLE_PERMISSION_BASES) {
+			registerPermission(pm, permission + ".*",
+					permission + ".minecart",
+					permission + ".boat");
+		}
 	}
 
-	private static void registerAllMaterial(PluginManager pm) {
+	private static void registerMaterial(PluginManager pm) {
 		Material[] materialValues = Material.values();
 		Permission[] permissions = new Permission[MATERIAL_PERMISSION_BASES.length];
 		for (int i = 0; i < permissions.length; i++) {
@@ -138,7 +171,7 @@ public class ModifyworldPermissionRegister {
 		}
 	}
 
-	private static void registerAllEntity(PluginManager pm) {
+	private static void registerEntity(PluginManager pm) {
 		EntityType[] values = EntityType.values();
 		Permission[] permissions = new Permission[ENTITY_PERMISSION_BASES.length];
 		for (int i = 0; i < permissions.length; i++) {
@@ -155,19 +188,7 @@ public class ModifyworldPermissionRegister {
 		}
 	}
 
-	private static void registerVehicle(PluginManager pm) {
-		registerPermission(pm, "modifyworld.vehicle.*",
-				"modifyworld.vehicle.enter.*",
-				"modifyworld.vehicle.destroy.*",
-				"modifyworld.vehicle.collide.*");
-		for (String permission : VEHICLE_PERMISSION_BASES) {
-			registerPermission(pm, permission + ".*",
-					permission + ".minecart",
-					permission + ".boat");
-		}
-	}
-
-	private static void registerBlocksHanging(PluginManager pm) {
+	private static void registerHanging(PluginManager pm) {
 		EntityType[] values = {EntityType.PAINTING, EntityType.ITEM_FRAME};
 		Permission[] permissions = new Permission[HANGING_PERMISSION_BASES.length];
 		for (int i = 0; i < permissions.length; i++) {
@@ -182,14 +203,6 @@ public class ModifyworldPermissionRegister {
 		for (int i = 0; i < permissions.length; i++) {
 			recalculatePermission(pm, permissions[i]);
 		}
-	}
-
-	private static void registerBlocks(PluginManager pm) {
-		registerPermission(pm, "modifyworld.blocks.*",
-				"modifyworld.blocks.interact.*",
-				"modifyworld.blocks.place.*",
-				"modifyworld.blocks.destroy.*");
-
 	}
 
 	private static void registerPermission(PluginManager pm, String name, String... children) {
@@ -225,25 +238,16 @@ public class ModifyworldPermissionRegister {
 		if (entity instanceof ComplexEntityPart) {
 			return getPermission((ComplexEntityPart) entity);
 		}
+		if (entity instanceof Player) {
+			return "player." + ((Player) entity).getName();
+		}
+		if (entity instanceof Item) {
+			return getPermission(((Item) entity).getItemStack());
+//		} else if (entity instanceof Tameable && ((Tameable) entity).isTamed()) {
+//			return getPermission(entity.getType()) + "." + ((Tameable) entity).getOwner().getName();
+		}
 		return getPermission(entity.getType());
-//		if (entity instanceof Player) {
-//			return "player";
-//		}
-//		String entityName;
-//		if (entity instanceof Item) {
-//			entityName = getPermission(((Item) entity).getItemStack().getType());
-//		} else {
-//			entityName = getPermission(entity.getType());
-//		}
-//		if (entity instanceof Tameable) {
-//			Tameable animal = (Tameable) entity;
-//			return "animal." + entityName + (animal.isTamed() ? "." + animal.getOwner().getName() : "");
-//		}
-//		EntityCategory category = EntityCategory.fromEntity(entity);
-//		if (category == null) {
-//			return entityName; // category unknown (ender crystal)
-//		}
-//		return category.getName() + "." + entityName;
+
 	}
 
 	public static String getPermission(ComplexEntityPart complexEntityPart) {
