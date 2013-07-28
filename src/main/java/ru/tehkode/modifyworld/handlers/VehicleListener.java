@@ -35,35 +35,35 @@ import ru.tehkode.modifyworld.PlayerInformer;
  */
 public class VehicleListener extends ModifyworldListener {
 
-	public VehicleListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
-		super(plugin, config, informer);
-	}
+    public VehicleListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
+        super(plugin, config, informer);
+    }
 
-	@EventHandler(priority = EventPriority.LOW)
-	public void onVehicleDamage(VehicleDamageEvent event) {
-		if (event.getAttacker() instanceof Player
-				&& isPermissionDeniedMessage((Player) event.getAttacker(), "modifyworld.vehicle.destroy", event.getVehicle())) {
-			event.setCancelled(true);
-		}
-	}
+    @EventHandler(priority = EventPriority.LOW)
+    public void onVehicleDamage(VehicleDamageEvent event) {
+        if (event.getAttacker() instanceof Player
+                && isPermissionDeniedMessage((Player) event.getAttacker(), "modifyworld.vehicle.destroy", event.getVehicle())) {
+            event.setCancelled(true);
+        }
+    }
 
-	@EventHandler(priority = EventPriority.LOW)
-	public void onVehicleEnter(VehicleEnterEvent event) {
-		if (event.getEntered() instanceof Player
-				&& isPermissionDeniedMessage((Player) event.getEntered(), "modifyworld.vehicle.enter", event.getVehicle())) {
-			event.setCancelled(true);
-		}
-	}
+    @EventHandler(priority = EventPriority.LOW)
+    public void onVehicleEnter(VehicleEnterEvent event) {
+        if (event.getEntered() instanceof Player
+                && isPermissionDeniedMessage((Player) event.getEntered(), "modifyworld.vehicle.enter", event.getVehicle())) {
+            event.setCancelled(true);
+        }
+    }
 
-	@EventHandler(priority = EventPriority.LOW)
-	public void onVehicleEntityCollision(VehicleEntityCollisionEvent event) {
-		if (event.getEntity() instanceof Player
-				&& isPermissionDenied((Player) event.getEntity(), "modifyworld.vehicle.collide", event.getVehicle())) {
-			event.setCancelled(true);
-			event.setCollisionCancelled(true);
-			event.setPickupCancelled(true);
+    @EventHandler(priority = EventPriority.LOW)
+    public void onVehicleEntityCollision(VehicleEntityCollisionEvent event) {
+        if (event.getEntity() instanceof Player
+                && isPermissionDenied((Player) event.getEntity(), "modifyworld.vehicle.collide", event.getVehicle())) {
+            event.setCancelled(true);
+            event.setCollisionCancelled(true);
+            event.setPickupCancelled(true);
 
-		}
+        }
 
-	}
+    }
 }

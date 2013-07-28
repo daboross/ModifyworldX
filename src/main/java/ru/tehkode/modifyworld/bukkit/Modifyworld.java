@@ -72,7 +72,7 @@ public class Modifyworld extends JavaPlugin {
         this.informer = new PlayerInformer(config);
         this.registerListeners();
         this.saveConfig();
-		ModifyworldPermissionRegister.registerAllPermissions(this);
+        ModifyworldPermissionRegister.registerAllPermissions(this);
         this.getLogger().info("Modifyworld enabled!");
     }
 
