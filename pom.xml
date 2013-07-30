@@ -1,26 +1,24 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>ru.tehkode</groupId>
+    <groupId>net.daboross</groupId>
     <artifactId>ModifyworldX</artifactId>
     <version>1.21.0</version>
-    <name>Modifyworld</name>
-    <url>https://github.com/daboross/Modifyworld</url>
+    <name>ModifyworldX</name>
+    <url>https://github.com/daboross/ModifyworldX</url>
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/daboross/Modifyworld/issues</url>
+        <url>https://github.com/daboross/ModifyworldX/issues</url>
     </issueManagement>
     <scm>
-        <connection>scm:git:git://github.com/daboross/Modifyworld.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/daboross/Modifyworld.git</developerConnection>
-        <url>https://github.com/daboross/PermissionsEx.git</url>
+        <connection>scm:git:git://github.com/daboross/ModifyworldX.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/daboross/ModifyworldX.git</developerConnection>
+        <url>https://github.com/daboross/ModifyworldX.git</url>
     </scm>
     <build>
         <finalName>${project.artifactId}</finalName>
         <resources>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
-                <!--<targetPath>/</targetPath>-->
                 <includes>
                     <include>**</include>
                 </includes>
@@ -68,7 +66,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.6.1-R0.1-SNAPSHOT</version>
+            <version>1.6.2-R0.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
     </dependencies>

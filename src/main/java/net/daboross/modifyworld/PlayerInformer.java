@@ -1,4 +1,4 @@
-package ru.tehkode.modifyworld;
+package net.daboross.modifyworld;
 
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;

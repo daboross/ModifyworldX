@@ -16,18 +16,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package ru.tehkode.modifyworld.bukkit;
+package net.daboross.modifyworld.bukkit;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import ru.tehkode.modifyworld.ModifyworldListener;
-import ru.tehkode.modifyworld.PlayerInformer;
-import ru.tehkode.modifyworld.handlers.BlockListener;
-import ru.tehkode.modifyworld.handlers.PlayerListener;
-import ru.tehkode.modifyworld.handlers.VehicleListener;
+import net.daboross.modifyworld.ModifyworldListener;
+import net.daboross.modifyworld.PlayerInformer;
+import net.daboross.modifyworld.handlers.BlockListener;
+import net.daboross.modifyworld.handlers.PlayerListener;
+import net.daboross.modifyworld.handlers.VehicleListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.plugin.PluginManager;
-import ru.tehkode.modifyworld.handlers.EntityListener;
+import net.daboross.modifyworld.handlers.EntityListener;
 
 /**
  *
