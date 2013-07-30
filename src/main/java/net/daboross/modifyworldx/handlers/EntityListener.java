@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package net.daboross.modifyworld.handlers;
+package net.daboross.modifyworldx.handlers;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,8 +24,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.configuration.ConfigurationSection;
-import net.daboross.modifyworld.ModifyworldListener;
-import net.daboross.modifyworld.PlayerInformer;
+import net.daboross.modifyworldx.ModifyworldListener;
+import net.daboross.modifyworldx.PlayerInformer;
 
 /**
  *

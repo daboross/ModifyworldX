@@ -16,18 +16,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package net.daboross.modifyworld.bukkit;
+package net.daboross.modifyworldx.bukkit;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import net.daboross.modifyworld.ModifyworldListener;
-import net.daboross.modifyworld.PlayerInformer;
-import net.daboross.modifyworld.handlers.BlockListener;
-import net.daboross.modifyworld.handlers.PlayerListener;
-import net.daboross.modifyworld.handlers.VehicleListener;
+import net.daboross.modifyworldx.ModifyworldListener;
+import net.daboross.modifyworldx.PlayerInformer;
+import net.daboross.modifyworldx.handlers.BlockListener;
+import net.daboross.modifyworldx.handlers.PlayerListener;
+import net.daboross.modifyworldx.handlers.VehicleListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.plugin.PluginManager;
-import net.daboross.modifyworld.handlers.EntityListener;
+import net.daboross.modifyworldx.handlers.EntityListener;
 
 /**
  *

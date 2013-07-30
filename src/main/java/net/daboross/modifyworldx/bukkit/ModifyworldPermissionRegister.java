@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.daboross.modifyworld.bukkit;
+package net.daboross.modifyworldx.bukkit;
 
 import java.util.Map;
 import java.util.logging.Level;

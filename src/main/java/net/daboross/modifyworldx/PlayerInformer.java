@@ -1,4 +1,4 @@
-package net.daboross.modifyworld;
+package net.daboross.modifyworldx;
 
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;

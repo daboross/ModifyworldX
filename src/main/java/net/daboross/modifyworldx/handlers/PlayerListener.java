@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package net.daboross.modifyworld.handlers;
+package net.daboross.modifyworldx.handlers;
 
 import java.util.logging.Level;
 import org.bukkit.Material;
@@ -37,8 +37,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.SpawnEgg;
 import org.bukkit.plugin.Plugin;
-import net.daboross.modifyworld.ModifyworldListener;
-import net.daboross.modifyworld.PlayerInformer;
+import net.daboross.modifyworldx.ModifyworldListener;
+import net.daboross.modifyworldx.PlayerInformer;
 
 /**
  * @author t3hk0d3

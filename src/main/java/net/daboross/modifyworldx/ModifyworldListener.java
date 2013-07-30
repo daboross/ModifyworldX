@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package net.daboross.modifyworld;
+package net.daboross.modifyworldx;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -26,7 +26,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import net.daboross.modifyworld.bukkit.ModifyworldPermissionRegister;
+import net.daboross.modifyworldx.bukkit.ModifyworldPermissionRegister;
 
 /**
  *
