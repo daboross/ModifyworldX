@@ -1,6 +1,7 @@
 item-restrictions: false
 inform-players: false
 drop-restricted-item: false
+just-warn-on-remove: true
 messages:
   message-format: '&f[&2Modifyworld&f]&4 %s'
   default-message: Sorry, you don't have enough permissions

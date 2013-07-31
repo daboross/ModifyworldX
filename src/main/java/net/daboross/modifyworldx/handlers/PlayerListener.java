@@ -47,11 +47,13 @@ public class PlayerListener extends ModifyworldListener {
 
     protected boolean checkInventory = false;
     protected boolean dropRestrictedItem = false;
+    protected boolean justWarn = true;
 
     public PlayerListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
         super(plugin, config, informer);
         this.checkInventory = config.getBoolean("item-restrictions", this.checkInventory);
         this.dropRestrictedItem = config.getBoolean("drop-restricted-item", this.dropRestrictedItem);
+        this.justWarn = config.getBoolean("just-warn-on-remove", this.justWarn);
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -231,11 +233,14 @@ public class PlayerListener extends ModifyworldListener {
         PlayerInventory inventory = player.getInventory();
         for (ItemStack stack : inventory.getContents()) {
             if (stack != null && isPermissionDeniedMessage(player, "modifyworld.items.have", stack)) {
-                plugin.getLogger().log(Level.INFO, "Would have removed {0} from {1}", new Object[]{stack.getType().name().toLowerCase(), player});
-//				inventory.remove(stack);
-//				if (this.dropRestrictedItem) {
-//					player.getWorld().dropItemNaturally(player.getLocation(), stack);
-//				}
+                if (justWarn) {
+                    plugin.getLogger().log(Level.INFO, "Would have removed {0} from {1}", new Object[]{stack.getType().name().toLowerCase(), player});
+                } else {
+                    inventory.remove(stack);
+                    if (this.dropRestrictedItem) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), stack);
+                    }
+                }
             }
         }
     }

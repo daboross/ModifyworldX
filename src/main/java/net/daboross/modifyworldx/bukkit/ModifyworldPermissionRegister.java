@@ -104,7 +104,9 @@ public class ModifyworldPermissionRegister {
         EntityType.MINECART_HOPPER,
         EntityType.MINECART_MOB_SPAWNER,
         EntityType.MINECART_TNT,
-        EntityType.BOAT
+        EntityType.BOAT,
+        EntityType.PIG,
+        EntityType.HORSE
     };
     private static final EntityType[] HANGING_ENTITIES = new EntityType[]{
         EntityType.PAINTING,
