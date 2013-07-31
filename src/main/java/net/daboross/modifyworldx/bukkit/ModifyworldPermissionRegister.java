@@ -86,7 +86,8 @@ public class ModifyworldPermissionRegister {
         "modifyworld.items.pickup.*",
         "modifyworld.items.throw.*",
         "modifyworld.items.take.*",
-        "modifyworld.items.put.*"
+        "modifyworld.items.put.*",
+        "modifyworld.items.hold.*"
     };
     private static final String[] DAMAGE_STAR_CHILDREN = new String[]{
         "modifyworld.damage.deal.*",
