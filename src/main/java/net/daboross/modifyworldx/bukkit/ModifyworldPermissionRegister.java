@@ -25,6 +25,8 @@ import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
@@ -66,6 +68,9 @@ public class ModifyworldPermissionRegister {
         "modifyworld.blocks.destroy",
         "modifyworld.blocks.interact"
     };
+    private static final String[] DAMAGE_CAUSE_PERMISSION_BASES = new String[]{
+        "modifyworld.damage.take"
+    };
     private static final String[] MODIFYWORLD_STAR_CHILDREN = new String[]{
         "modifyworld.usebeds",
         "modifyworld.bucket.*",
@@ -76,7 +81,8 @@ public class ModifyworldPermissionRegister {
         "modifyworld.items.*",
         "modifyworld.mobtarget.*",
         "modifyworld.tame.*",
-        "modifyworld.damage.*"
+        "modifyworld.damage.*",
+        "modifyworld.interact.*"
     };
     private static final String[] ITEMS_STAR_CHILDREN = new String[]{
         "modifyworld.items.craft.*",
@@ -124,6 +130,7 @@ public class ModifyworldPermissionRegister {
             registerBlockStar(pm);
             registerEntityTypes(pm);
             registerVehicle(pm);
+            registerDamageCause(pm);
             registerModifyworldStar(pm);
         } catch (IllegalArgumentException ex) {
             plugin.getLogger().log(Level.WARNING, "Failed to register permissions with error", ex);
@@ -217,6 +224,23 @@ public class ModifyworldPermissionRegister {
             String permission = getPermission(entityType);
             for (int i = 0; i < permissions.length; i++) {
                 permissions[i].getChildren().put(HANGING_PERMISSION_BASES[i] + "." + permission, Boolean.TRUE);
+            }
+        }
+        for (int i = 0; i < permissions.length; i++) {
+            recalculatePermission(pm, permissions[i]);
+        }
+    }
+
+    private static void registerDamageCause(PluginManager pm) {
+        EntityDamageEvent.DamageCause[] damageCauses = EntityDamageEvent.DamageCause.values();
+        Permission[] permissions = new Permission[DAMAGE_CAUSE_PERMISSION_BASES.length];
+        for (int i = 0; i < permissions.length; i++) {
+            permissions[i] = getPermission(pm, DAMAGE_CAUSE_PERMISSION_BASES[i] + ".*");
+        }
+        for (DamageCause damageCause : damageCauses) {
+            String permission = getPermission(damageCause);
+            for (int i = 0; i < permissions.length; i++) {
+                permissions[i].getChildren().put(DAMAGE_CAUSE_PERMISSION_BASES[i] + "." + permission, Boolean.TRUE);
             }
         }
         for (int i = 0; i < permissions.length; i++) {
