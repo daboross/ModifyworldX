@@ -22,42 +22,32 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.*;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.configuration.ConfigurationSection;
-import net.daboross.modifyworldx.ModifyworldListener;
-import net.daboross.modifyworldx.PlayerInformer;
+import static net.daboross.modifyworldx.PermissionsHelper.assemblePermission;
+import org.bukkit.event.Listener;
 
-/**
- *
- * @author t3hk0d3
- */
-public class EntityListener extends ModifyworldListener {
-
-    public EntityListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
-        super(plugin, config, informer);
-    }
+public class EntityListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityDamage(EntityDamageEvent event) {
         if (event instanceof EntityDamageByEntityEvent) {
-            EntityDamageByEntityEvent edbe = (EntityDamageByEntityEvent) event;
-            if (edbe.getDamager() instanceof Player) { // Prevent from damaging by player
-                Player player = (Player) edbe.getDamager();
-                if (isPermissionDeniedMessage(player, "modifyworld.damage.deal", event.getEntity())) {
+            EntityDamageByEntityEvent evt = (EntityDamageByEntityEvent) event;
+            if (evt.getDamager() instanceof Player) { // Prevent from damaging by player
+                Player player = (Player) evt.getDamager();
+                if (!player.hasPermission(assemblePermission("damage.deal", event.getEntity()))) {
                     event.setCancelled(true);
                 }
             }
-            if (edbe.getEntity() instanceof Player) {
-                Player player = (Player) edbe.getEntity();
-                if (edbe.getDamager() != null && player.isOnline()) { // Prevent from taking damage by entity
-                    if (isPermissionDenied(player, "modifyworld.damage.take", edbe.getDamager())) {
+            if (evt.getEntity() instanceof Player) {
+                Player player = (Player) evt.getEntity();
+                if (evt.getDamager() != null && player.isOnline()) { // Prevent from taking damage by entity
+                    if (!player.hasPermission(assemblePermission("damage.take", evt.getDamager()))) {
                         event.setCancelled(true);
                     }
                 }
             }
         } else if (event.getEntity() instanceof Player) { // player are being damaged by enviroment
             Player player = (Player) event.getEntity();
-            if (isPermissionDenied(player, "modifyworld.damage.take", event.getCause())) {
+            if (!player.hasPermission(assemblePermission("damage.take", event.getCause()))) {
                 event.setCancelled(true);
             }
         }
@@ -67,7 +57,7 @@ public class EntityListener extends ModifyworldListener {
     public void onEntityTame(EntityTameEvent event) {
         if ((event.getOwner() instanceof Player)) {
             Player player = (Player) event.getOwner();
-            if (isPermissionDeniedMessage(player, "modifyworld.tame", event.getEntity())) {
+            if (!player.hasPermission(assemblePermission("tame", event.getEntity()))) {
                 event.setCancelled(true);
             }
         }
@@ -77,7 +67,7 @@ public class EntityListener extends ModifyworldListener {
     public void onEntityTarget(EntityTargetEvent event) {
         if (event.getTarget() instanceof Player) {
             Player player = (Player) event.getTarget();
-            if (isPermissionDenied(player, "modifyworld.mobtarget", event.getEntity())) {
+            if (!player.hasPermission(assemblePermission("mobtarget", event.getEntity()))) {
                 event.setCancelled(true);
             }
         }

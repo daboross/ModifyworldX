@@ -18,27 +18,20 @@
  */
 package net.daboross.modifyworldx.bukkit;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import net.daboross.modifyworldx.ModifyworldListener;
-import net.daboross.modifyworldx.PlayerInformer;
+import net.daboross.modifyworldx.PermissionsHelper;
 import net.daboross.modifyworldx.handlers.BlockListener;
 import net.daboross.modifyworldx.handlers.PlayerListener;
 import net.daboross.modifyworldx.handlers.VehicleListener;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.plugin.PluginManager;
 import net.daboross.modifyworldx.handlers.EntityListener;
+import org.bukkit.event.Listener;
 
 /**
  *
@@ -46,14 +39,12 @@ import net.daboross.modifyworldx.handlers.EntityListener;
  */
 public class Modifyworld extends JavaPlugin {
 
-    protected final static Class<? extends ModifyworldListener>[] LISTENERS = new Class[]{
+    protected final static Class<? extends PermissionsHelper>[] LISTENERS = new Class[]{
         PlayerListener.class,
         BlockListener.class,
         VehicleListener.class,
         EntityListener.class
     };
-    protected List<ModifyworldListener> listeners = new ArrayList<ModifyworldListener>();
-    protected PlayerInformer informer;
     protected File configFile;
     protected FileConfiguration config;
 
@@ -69,18 +60,14 @@ public class Modifyworld extends JavaPlugin {
             this.getLogger().severe("Deploying default config");
             this.initializeConfiguration(config);
         }
-        this.informer = new PlayerInformer(config);
         this.registerListeners();
         this.saveConfig();
         ModifyworldPermissionRegister.registerAllPermissions(this);
-        this.getLogger().info("Modifyworld enabled!");
     }
 
     @Override
     public void onDisable() {
-        this.listeners.clear();
         this.config = null;
-        this.getLogger().info("Modifyworld successfully disabled!");
     }
 
     protected void initializeConfiguration(FileConfiguration config) {
@@ -91,30 +78,16 @@ public class Modifyworld extends JavaPlugin {
         config.set("use-material-names", true);
         config.set("drop-restricted-item", false);
         config.set("item-use-check", false);
-
-        // Messages
-        config.set("messages/message-format", PlayerInformer.DEFAULT_MESSAGE_FORMAT);
-        config.set("messages/default-message", PlayerInformer.PERMISSION_DENIED);
-
-        // Predefined messages
-        config.set("messages/modifyworld.items.have", PlayerInformer.PROHIBITED_ITEM);
     }
 
     protected void registerListeners() {
         PluginManager pm = getServer().getPluginManager();
-        for (Class<? extends ModifyworldListener> listenerClass : LISTENERS) {
-            ModifyworldListener listener;
-            try {
-                Constructor<? extends ModifyworldListener> constructor =
-                        listenerClass.getConstructor(Plugin.class, ConfigurationSection.class, PlayerInformer.class);
-                listener = constructor.newInstance(this, this.getConfig(), this.informer);
-            } catch (Throwable e) {
-                this.getLogger().log(Level.WARNING, "Failed to initialize \"{0}\" listener", listenerClass.getName());
-                this.getLogger().log(Level.WARNING, "Initialization error: ", e);
-                continue;
-            }
+        this.registerListeners(pm, new BlockListener(), new EntityListener(), new PlayerListener(this, config), new VehicleListener());
+    }
+
+    protected void registerListeners(PluginManager pm, Listener... listeners) {
+        for (Listener listener : listeners) {
             pm.registerEvents(listener, this);
-            this.listeners.add(listener);
         }
     }
 
@@ -140,23 +113,25 @@ public class Modifyworld extends JavaPlugin {
         this.config = new YamlConfiguration();
         config.options().pathSeparator('/');
         try {
-            config.load(configFile);
-        } catch (FileNotFoundException e) {
-            this.getLogger().severe("Configuration file not found - deploying default one");
-            InputStream defConfigStream = getResource("config.yml");
-            if (defConfigStream != null) {
-                try {
-                    this.config.load(defConfigStream);
-                } catch (Exception de) {
-                    this.getLogger().severe("Default config file is broken.");
+            if (configFile.exists()) {
+                config.load(configFile);
+                InputStream defConfigStream = getResource("config.yml");
+                if (defConfigStream != null) {
+                    this.config.setDefaults(YamlConfiguration.loadConfiguration(defConfigStream));
+                }
+            } else {
+                this.getLogger().info("Deploying default configuration");
+                InputStream defConfigStream = getResource("config.yml");
+                if (defConfigStream != null) {
+                    try {
+                        this.config.load(defConfigStream);
+                    } catch (Exception dex) {
+                        this.getLogger().log(Level.SEVERE, "Failed to load default configuration", dex);
+                    }
                 }
             }
-        } catch (Exception e) {
-            this.getLogger().log(Level.SEVERE, "Failed to load configuration file: {0}", e.getMessage());
-        }
-        InputStream defConfigStream = getResource("config.yml");
-        if (defConfigStream != null) {
-            this.config.setDefaults(YamlConfiguration.loadConfiguration(defConfigStream));
+        } catch (Exception ex) {
+            this.getLogger().log(Level.SEVERE, "Failed to load configuration", ex);
         }
     }
 }

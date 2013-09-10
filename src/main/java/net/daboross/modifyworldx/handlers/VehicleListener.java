@@ -18,31 +18,21 @@
  */
 package net.daboross.modifyworldx.handlers;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.plugin.Plugin;
-import net.daboross.modifyworldx.ModifyworldListener;
-import net.daboross.modifyworldx.PlayerInformer;
+import static net.daboross.modifyworldx.PermissionsHelper.assemblePermission;
+import org.bukkit.event.Listener;
 
-/**
- *
- * @author t3hk0d3
- */
-public class VehicleListener extends ModifyworldListener {
-
-    public VehicleListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
-        super(plugin, config, informer);
-    }
+public class VehicleListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onVehicleDamage(VehicleDamageEvent event) {
         if (event.getAttacker() instanceof Player
-                && isPermissionDeniedMessage((Player) event.getAttacker(), "modifyworld.vehicle.destroy", event.getVehicle())) {
+                && !((Player) event.getAttacker()).hasPermission(assemblePermission("vehicle.destroy", event.getVehicle()))) {
             event.setCancelled(true);
         }
     }
@@ -50,7 +40,7 @@ public class VehicleListener extends ModifyworldListener {
     @EventHandler(priority = EventPriority.LOW)
     public void onVehicleEnter(VehicleEnterEvent event) {
         if (event.getEntered() instanceof Player
-                && isPermissionDeniedMessage((Player) event.getEntered(), "modifyworld.vehicle.enter", event.getVehicle())) {
+                && !((Player) event.getEntered()).hasPermission(assemblePermission("vehicle.enter", event.getVehicle()))) {
             event.setCancelled(true);
         }
     }
@@ -58,7 +48,7 @@ public class VehicleListener extends ModifyworldListener {
     @EventHandler(priority = EventPriority.LOW)
     public void onVehicleEntityCollision(VehicleEntityCollisionEvent event) {
         if (event.getEntity() instanceof Player
-                && isPermissionDenied((Player) event.getEntity(), "modifyworld.vehicle.collide", event.getVehicle())) {
+                && !((Player) event.getEntity()).hasPermission(assemblePermission("vehicle.collide", event.getVehicle()))) {
             event.setCancelled(true);
             event.setCollisionCancelled(true);
             event.setPickupCancelled(true);

@@ -18,7 +18,6 @@
  */
 package net.daboross.modifyworldx.handlers;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,46 +25,37 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
-import org.bukkit.plugin.Plugin;
-import net.daboross.modifyworldx.ModifyworldListener;
-import net.daboross.modifyworldx.PlayerInformer;
+import static net.daboross.modifyworldx.PermissionsHelper.assemblePermission;
+import org.bukkit.event.Listener;
 
-/**
- *
- * @author t3hk0d3
- */
-public class BlockListener extends ModifyworldListener {
-
-    public BlockListener(Plugin plugin, ConfigurationSection config, PlayerInformer informer) {
-        super(plugin, config, informer);
-    }
+public class BlockListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onBlockBreak(BlockBreakEvent event) {
-        if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.blocks.destroy", event.getBlock())) {
-            event.setCancelled(true);
+    public void onBlockBreak(BlockBreakEvent evt) {
+        if (!evt.getPlayer().hasPermission(assemblePermission("blocks.destroy", evt.getBlock()))) {
+            evt.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onBlockPlace(BlockPlaceEvent event) {
-        if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.blocks.place", event.getBlock())) {
-            event.setCancelled(true);
+    public void onBlockPlace(BlockPlaceEvent evt) {
+        if (!evt.getPlayer().hasPermission(assemblePermission("blocks.place", evt.getBlock()))) {
+            evt.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onHangingBreakByEntity(HangingBreakByEntityEvent event) {
-        if (event.getRemover() instanceof Player
-                && isPermissionDeniedMessage((Player) event.getRemover(), "modifyworld.blocks.destroy", event.getEntity().getType())) {
+        if (event.getRemover() instanceof Player && !((Player) event.getRemover()).hasPermission(
+                assemblePermission("blocks.destroy", event.getEntity().getType()))) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onPaintingPlace(HangingPlaceEvent event) {
-        if (isPermissionDeniedMessage(event.getPlayer(), "modifyworld.blocks.place", event.getEntity().getType())) {
-            event.setCancelled(true);
+    public void onPaintingPlace(HangingPlaceEvent evt) {
+        if (!evt.getPlayer().hasPermission(assemblePermission("blocks.place", evt.getEntity().getType()))) {
+            evt.setCancelled(true);
         }
     }
 }
