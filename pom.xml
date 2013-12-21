@@ -5,15 +5,31 @@
     <version>1.22.1</version>
     <name>ModifyworldX</name>
     <url>https://github.com/daboross/ModifyworldX</url>
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/daboross/ModifyworldX/issues</url>
-    </issueManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     <scm>
         <connection>scm:git:git://github.com/daboross/ModifyworldX.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/daboross/ModifyworldX.git</developerConnection>
         <url>https://github.com/daboross/ModifyworldX.git</url>
     </scm>
+
+    <repositories>
+        <repository>
+            <id>bukkit-repo</id>
+            <url>http://repo.bukkit.org/content/groups/public</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.6.4-R2.0</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+
     <build>
         <finalName>${project.artifactId}</finalName>
         <resources>
@@ -29,7 +45,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
+                <version>3.1</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -45,21 +61,9 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.6.2-R0.1-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-    </dependencies>
-    <repositories>
-        <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public</url>
-        </repository>
-    </repositories>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/daboross/ModifyworldX/issues</url>
+    </issueManagement>
 </project>
